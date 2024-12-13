@@ -1,0 +1,84 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.2.9
+Date: 08/12/2024
+  Bugfixes:
+    - Fixed an issue where the base quality factor wasn't in a percentage value.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.8
+Date: 04/12/2024
+  Bugfixes:
+    - Fixed an issue when other mods tried to edit removed technologies.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.7
+Date: 26/11/2024
+  Bugfixes:
+    - Fixed an issue when other mods had technologies introducing machines which had multiple icons.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.6
+Date: 25/11/2024
+  Bugfixes:
+    - Fixed an issue when other mods had technologies introducing machines which had icon sizes not equal to 256 by 256.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.5
+Date: 25/11/2024
+  Bugfixes:
+    - Technologies with no effects when using the mod are now properly deleted.
+    - Localisation for most AMS machines no longer use the fallback.
+  Changes:
+    - Technologies for unlocking AMS machines now require the technologies for their respective regular machines, if they exist.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.4
+Date: 23/11/2024
+  Bugfixes:
+    - Fixed an issue where AMS machines could not be recycled.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.3
+Date: 16/11/2024
+  Bugfixes:
+    - Fixed an issue where AMS machines had only 2 module slots.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.2
+Date: 16/11/2024
+  Bugfixes:
+    - Fixed an issue where AMS machines were extremely fast.
+  Changes:
+    - Removed the setting to change the added module slots in AMS machines.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.1
+Date: 10/11/2024
+  Bugfixes:
+    - Fixed an issue which occurs when machines don't have a corrosponding item.
+---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 10/11/2024
+  Features:
+    - Added a setting to change the added module slots in AMS machines.
+    - Added a "hand-curated" block-list for machines to have AMS versions.
+    - Added an opt-out for machines to have AMS versions.
+  Bugfixes:
+    - Fixed an issue with the log output.
+    - Fixed an issue with AMS machines not applying any effects other than quality.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 5/11/2024
+  Features:
+    - Added a setting to toggle AMS machines.
+  Bugfixes:
+    - Fixed an issue which occurs when an alternative locale format is used for a macine.
+    - Fixed potential issue which would occur when no locale is provided for a machine.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 30/10/2024
+  Bugfixes:
+    - Fixed an issue which occurs when setting the Quality Module Multiplier option too high.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 30/10/2024
+  Minor Features:
+    - Added Additional Settings.
+    - Added Changelog.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 30/10/2024
+  Major Features:
+    - Initial Release.
