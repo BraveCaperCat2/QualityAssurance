@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.0
+Date: 17/12/2024
+  Features:
+    - Add a supporters list (supporters.md, find it in the mod files or source!)
+    - Enable AMSification and base quality for mining drills.
+    - Enable AMSification for rocket silos.
+  Changes:
+    - Various internal code changes.
+  Bugfixes:
+    - Fixed an issue where some technology requirements would double.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.9
 Date: 08/12/2024
   Bugfixes:

@@ -165,7 +165,7 @@ for _,MachineType in pairs(MachineTypes) do
             -- Create a new version of all machines which have additional module slots.
             if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not MachineBanned ) then
                 log("Creating AMS version of \"" .. Machine.name .. "\" now.")
-                AMSMachine = table.deepcopy(Machine)
+                local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
                 AMSMachine = Localiser(AMSMachine, Machine)
 
@@ -228,7 +228,7 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineItem.place_result = AMSMachine.name
                 AMSMachine.MachineItem = AMSMachineItem.name
 
-                AMSMachineRecipe = {}
+                local AMSMachineRecipe = {}
                 AMSMachineRecipe.name = AMSMachineItem.name
                 AMSMachineRecipe.type = "recipe"
                 AMSMachineRecipe = Localiser(AMSMachineRecipe, Machine)
@@ -251,20 +251,25 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineRecipe.category = "crafting"
                 AMSMachineRecipe.enabled = false
                 
-                AMSMachineTechnology = table.deepcopy(data.raw["technology"]["automation"])
+                local AMSMachineTechnology = table.deepcopy(data.raw["technology"]["automation-2"])
                 AMSMachineTechnology.name = AMSMachine.name
                 -- Thank you, A.Freeman (from the mod portal) for providing me this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
-                Prerequisite = GetMachineTechnology(Machine)
+                local Prerequisite = GetMachineTechnology(Machine)
                 if Prerequisite then
                     AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing", "electronics"}
                     if data.raw["technology"][Prerequisite].icon and data.raw["technology"][Prerequisite].icon ~= "" then
                         AMSMachineTechnology.icon = data.raw["technology"][Prerequisite].icon
                         AMSMachineTechnology.icon_size = data.raw["technology"][Prerequisite].icon_size
-                    elseif data.raw["technology"][Prerequisite].icon and data.raw["technology"][Prerequisite].icon ~= {} then
+                    elseif data.raw["technology"][Prerequisite].icons and data.raw["technology"][Prerequisite].icons ~= {} then
                         AMSMachineTechnology.icons = data.raw["technology"][Prerequisite].icons
                     end
-                    if Prerequisite.unit then
-                        AMSMachineTechnology.unit.count = 2 * data.raw["technology"][Prerequisite].unit.count
+                    if data.raw["technology"][Prerequisite].unit then
+                        AMSMachineTechnology.unit = table.deepcopy(data.raw["technology"][Prerequisite].unit)
+                        AMSMachineTechnology.unit.count = 2 * AMSMachineTechnology.unit.count
+                        AMSMachineTechnology.research_trigger = nil
+                    elseif data.raw["technology"][Prerequisite].research_trigger then
+                        AMSMachineTechnology.research_trigger = table.deepcopy(data.raw["technology"][Prerequisite].research_trigger)
+                        AMSMachineTechnology.unit = nil
                     end
                 else
                     AMSMachineTechnology.prerequisites = {"steel-processing", "electronics"}
