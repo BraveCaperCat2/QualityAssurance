@@ -16,7 +16,7 @@ end
 local function Localiser(AMS, Machine)
     -- Thank you, A.Freeman (from the mod portal) for providing me with this new localisation system. The function part was my idea though. (If I ever add a supporters list, you'll be on it!)
     if AMS.type == "technology" then
-        if Machine.localised_name ~= nil and not Machine.localised_name == {} and not Machine.localised_name == "" then
+        if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
             AMS.localised_name = {"ams.tech-name", {Machine.localised_name}}
             AMS.localised_description = {"ams.tech-description", {Machine.localised_name}}
         else
@@ -24,7 +24,7 @@ local function Localiser(AMS, Machine)
             AMS.localised_description = {"ams.tech-description", {"entity-name."..Machine.name}}
         end
     else
-        if Machine.localised_name ~= nil and not Machine.localised_name == {} and not Machine.localised_name == "" then
+        if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
             AMS.localised_name = {"ams.name", {Machine.localised_name}}
             AMS.localised_description = {"ams.description", {Machine.localised_name}}
         else
@@ -38,9 +38,9 @@ end
 -- Thank you, A.Freeman (from the mod portal) for providing me with this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
 local function GetMachineTechnology(Machine)
     for i,Technology in pairs(data.raw["technology"]) do
-        if Technology.effects ~= nil then
+        if Technology.effects then
             for j,Effect in pairs(Technology.effects) do
-                if Effect ~= nil and Effect.type == "unlock-recipe" and Effect.recipe == Machine.name then
+                if Effect and Effect.type == "unlock-recipe" and Effect.recipe == Machine.name then
                     return Technology.name
                 end
             end
@@ -70,16 +70,16 @@ local function AddQuality(Machine)
     end
     local BaseQuality = false
     while not BaseQuality do
-        if Machine.effect_receiver ~= nil then
-            if Machine.effect_receiver.base_effect ~= nil then
-                if Machine.effect_receiver.base_effect.quality ~= nil then
+        if Machine.effect_receiver then
+            if Machine.effect_receiver.base_effect then
+                if Machine.effect_receiver.base_effect.quality then
                     if Machine.effect_receiver.base_effect.quality == 0 then
                         log("Machine does not contain base quality. Adding base quality.")
                         Machine.effect_receiver.base_effect.quality = config("base-quality-value") / 100
                     else
                         log("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
-                        BaseQuality = true
                     end
+                    BaseQuality = true
                 else
                     log("Machine does not contain base quality. Preparing to add base quality.")
                     Machine.effect_receiver.base_effect.quality = 0
@@ -108,7 +108,7 @@ local function EnableQuality(Machine)
     local qualityadded = false
     local hasquality = false
     while not hasquality do
-        if Machine.allowed_effects ~= nil then
+        if Machine.allowed_effects then
             if type(Machine.allowed_effects) ~= "string" then
                 for _, AllowedEffect in pairs(Machine.allowed_effects) do
                     if AllowedEffect == "quality" then
@@ -130,17 +130,19 @@ local function EnableQuality(Machine)
 end
 
 -- Perform operations on automated crafting.
-local MachineTypes = {"crafting-machine", "furnace", "assembling-machine"}
+local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
 log("Performing operations on Automated Crafting.")
 for _,MachineType in pairs(MachineTypes) do
-    if data.raw[MachineType] ~= nil then
+    if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
             log("Scanning Machine \"" .. Machine.name .. "\" now.")
             
-            Machine = AddQuality(Machine)
+            if MachineType ~= "rocket-silo" then
+                Machine = AddQuality(Machine)
 
-            Machine = EnableQuality(Machine)
+                Machine = EnableQuality(Machine)
+            end
 
             data.raw[MachineType][j] = Machine
 
@@ -168,24 +170,28 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachine = Localiser(AMSMachine, Machine)
 
                 local AddedModuleSlots = config("added-module-slots")
-                local CraftingSpeedMultiplier = 1
+                local SpeedMultiplier = 1
                 if AMSMachine.module_slots == nil then
                     AMSMachine.module_slots = 0
                 end
                 if EnableCraftingSpeedFunction == true then
                     if AMSMachine.module_slots + AddedModuleSlots < 0 then
-                        CraftingSpeedMultiplier = GetCraftingSpeedMultiplier(AMSMachine.module_slots)
+                        SpeedMultiplier = GetCraftingSpeedMultiplier(AMSMachine.module_slots)
                         AMSMachine.module_slots = 0
                     elseif AddedModuleSlots ~= 0 then
-                        CraftingSpeedMultiplier = GetCraftingSpeedMultiplier(AddedModuleSlots)
+                        SpeedMultiplier = GetCraftingSpeedMultiplier(AddedModuleSlots)
                         AMSMachine.module_slots = AMSMachine.module_slots + AddedModuleSlots
                     end
                 else
                     AddedModuleSlots = 2
                     AMSMachine.module_slots = AMSMachine.module_slots + 2
-                    CraftingSpeedMultiplier = 0.8
+                    SpeedMultiplier = 0.8
                 end
-                AMSMachine.crafting_speed = AMSMachine.crafting_speed * CraftingSpeedMultiplier
+                if AMSMachine.crafting_speed then
+                    AMSMachine.crafting_speed = AMSMachine.crafting_speed * SpeedMultiplier
+                elseif AMSMachine.mining_speed then
+                    AMSMachine.mining_speed = AMSMachine.mining_speed * SpeedMultiplier
+                end
                 AMSMachine["minable"] = AMSMachine["minable"] or {mining_time = 1}
                 AMSMachine.minable.results = nil
                 AMSMachine.minable.result = AMSMachine.name
@@ -194,7 +200,7 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachine.allowed_effects = {"speed", "productivity", "consumption", "pollution", "quality"}
                 AMSMachine.allowed_module_categories = {}
                 for _,ModuleCatergory in pairs(data.raw["module-category"]) do
-                    if ModuleCatergory ~= nil then
+                    if ModuleCatergory then
                         table.insert(AMSMachine.allowed_module_categories, ModuleCatergory.name)
                     end
                 end
@@ -208,9 +214,9 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachine.NAMSMachine = Machine.name
 
                 local AMSMachineItem = {}
-                if data.raw["item"][Machine.name] ~= nil then
+                if data.raw["item"][Machine.name] then
                     AMSMachineItem = table.deepcopy(data.raw["item"][Machine.name])
-                elseif data.raw["item"][Machine.MachineItem] ~= nil then
+                elseif data.raw["item"][Machine.MachineItem] then
                     AMSMachineItem = table.deepcopy(data.raw["item"][Machine.MachineItem])
                 else
                     AMSMachineItem = table.deepcopy(data.raw["item"]["assembling-machine-2"])
@@ -226,8 +232,8 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineRecipe.name = AMSMachineItem.name
                 AMSMachineRecipe.type = "recipe"
                 AMSMachineRecipe = Localiser(AMSMachineRecipe, Machine)
-                if Machine.MachineItem == nil and Machine.minable ~= nil then
-                    if Machine.minable.result ~= nil and Machine.minable.result ~= "" then
+                if Machine.MachineItem == nil and Machine.minable then
+                    if Machine.minable.result and Machine.minable.result ~= "" then
                         AMSMachineRecipe.ingredients = {{type = "item", name = Machine.minable.result, amount = 1}, {type = "item", name = "steel-plate", amount = 10}, {type = "item", name = "copper-cable", amount = 20}}
                     else
                         AMSMachineRecipe.ingredients = {{type = "item", name = "electronic-circuit", amount = 1}, {type = "item", name = "steel-plate", amount = 10}, {type = "item", name = "copper-cable", amount = 20}}
@@ -249,15 +255,15 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineTechnology.name = AMSMachine.name
                 -- Thank you, A.Freeman (from the mod portal) for providing me this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
                 Prerequisite = GetMachineTechnology(Machine)
-                if Prerequisite ~= nil then
+                if Prerequisite then
                     AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing", "electronics"}
-                    if data.raw["technology"][Prerequisite].icon ~= nil and data.raw["technology"][Prerequisite].icon ~= "" then
+                    if data.raw["technology"][Prerequisite].icon and data.raw["technology"][Prerequisite].icon ~= "" then
                         AMSMachineTechnology.icon = data.raw["technology"][Prerequisite].icon
                         AMSMachineTechnology.icon_size = data.raw["technology"][Prerequisite].icon_size
-                    elseif data.raw["technology"][Prerequisite].icon ~= nil and data.raw["technology"][Prerequisite].icon ~= {} then
+                    elseif data.raw["technology"][Prerequisite].icon and data.raw["technology"][Prerequisite].icon ~= {} then
                         AMSMachineTechnology.icons = data.raw["technology"][Prerequisite].icons
                     end
-                    if Prerequisite.unit ~= nil then
+                    if Prerequisite.unit then
                         AMSMachineTechnology.unit.count = 2 * data.raw["technology"][Prerequisite].unit.count
                     end
                 else
@@ -288,11 +294,10 @@ end
 log("Improving power of all quality modules.")
 for _,Module in pairs(data.raw["module"]) do
     log("Scanning module \"" .. Module.name .. "\" now.")
-    if Module.effect.quality ~= nil then
+    if Module.effect.quality then
         if Module.effect.quality >= 0 then
             log("Module \"" .. Module.name .. "\" contians a Quality increase. Increasing bonus.")
             Module.effect.quality = Module.effect.quality * config("quality-module-multiplier")
-            
         end
     end
 end
