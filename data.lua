@@ -123,7 +123,7 @@ local function EnableQuality(Machine)
                 Machine.allowed_effects = {Machine.allowed_effects}
             end
         else
-            Machine.allowed_effects = {}
+            hasquality = true
         end
     end
     return Machine
@@ -162,7 +162,7 @@ for _,MachineType in pairs(MachineTypes) do
                 log("Machine \"" .. Machine.name .. "\" is banned from AMS!")
             end
 
-            -- Create a new version of all machines which have additional module slots.
+            -- Create a new version of all machines which don't have additional module slots.
             if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not MachineBanned ) then
                 log("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 local AMSMachine = table.deepcopy(Machine)
@@ -184,7 +184,7 @@ for _,MachineType in pairs(MachineTypes) do
                     end
                 else
                     AddedModuleSlots = 2
-                    AMSMachine.module_slots = AMSMachine.module_slots + 2
+                    AMSMachine.module_slots = AMSMachine.module_slots + AddedModuleSlots
                     SpeedMultiplier = 0.8
                 end
                 if AMSMachine.crafting_speed then
@@ -265,7 +265,11 @@ for _,MachineType in pairs(MachineTypes) do
                     end
                     if data.raw["technology"][Prerequisite].unit then
                         AMSMachineTechnology.unit = table.deepcopy(data.raw["technology"][Prerequisite].unit)
-                        AMSMachineTechnology.unit.count = 2 * AMSMachineTechnology.unit.count
+                        if AMSMachineTechnology.unit.count then
+                            AMSMachineTechnology.unit.count = 2 * AMSMachineTechnology.unit.count
+                        elseif AMSMachineTechnology.unit.count_formula then
+                            AMSMachineTechnology.unit.count_formula = "2 * (" .. AMSMachineTechnology.unit.count_formula .. ")"
+                        end
                         AMSMachineTechnology.research_trigger = nil
                     elseif data.raw["technology"][Prerequisite].research_trigger then
                         AMSMachineTechnology.research_trigger = table.deepcopy(data.raw["technology"][Prerequisite].research_trigger)

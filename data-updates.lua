@@ -95,7 +95,7 @@ local function NAMSModifications(Machine)
     return Machine
 end
 
-local MachineTypes = {"crafting-machine", "furnace", "assembling-machine"}
+local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
 log("Initiating more operations on automated crafting.")
 for _,MachineType in pairs(MachineTypes) do
