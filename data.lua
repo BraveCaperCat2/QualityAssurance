@@ -126,6 +126,23 @@ local function EnableQuality(Machine)
             hasquality = true
         end
     end
+
+    while not qualityadded do
+        if Machine.effect_receiver then
+            if Machine.effect_receiver.uses_beacon_effects ~= true then
+                Machine.effect_receiver.uses_beacon_effects = true
+            end
+            if Machine.effect_receiver.uses_module_effects ~= true then
+                Machine.effect_receiver.uses_module_effects = true
+            end
+            if Machine.effect_receiver.uses_surface_effects ~= true then
+                Machine.effect_receiver.uses_surface_effects = true
+            end
+            qualityadded = true
+        else
+            Machine.effect_receiver = {}
+        end
+    end
     return Machine
 end
 
