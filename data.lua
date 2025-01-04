@@ -53,17 +53,23 @@ end
 local function AddQuality(Machine)
     -- Increase quality for a machine.
     if not config("base-quality") then
-        log("Base Quality setting is disabled. Skipping.")
+        if config("dev-mode") then
+            log("Base Quality setting is disabled. Skipping.")
+        end
         return Machine
     end
 
     if not config("moduleless-quality") then
         if Machine.module_slots == nil then
-            log("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+            if config("dev-mode") then
+                log("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+            end
             return Machine
         else
             if Machine.module_slots == 0 then
-                log("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+                if config("dev-mode") then
+                    log("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+                end
                 return Machine
             end
         end
@@ -74,14 +80,20 @@ local function AddQuality(Machine)
             if Machine.effect_receiver.base_effect then
                 if Machine.effect_receiver.base_effect.quality then
                     if Machine.effect_receiver.base_effect.quality == 0 then
-                        log("Machine does not contain base quality. Adding base quality.")
+                        if config("dev-mode") then
+                            log("Machine does not contain base quality. Adding base quality.")
+                        end
                         Machine.effect_receiver.base_effect.quality = config("base-quality-value") / 100
                     else
-                        log("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
+                        if config("dev-mode") then
+                            log("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
+                        end
                     end
                     BaseQuality = true
                 else
-                    log("Machine does not contain base quality. Preparing to add base quality.")
+                    if config("dev-mode") then
+                        log("Machine does not contain base quality. Preparing to add base quality.")
+                    end
                     Machine.effect_receiver.base_effect.quality = 0
                 end
             else
@@ -149,11 +161,15 @@ end
 -- Perform operations on automated crafting.
 local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
-log("Performing operations on Automated Crafting.")
+if config("dev-mode") then
+    log("Performing operations on Automated Crafting.")
+end
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
-            log("Scanning Machine \"" .. Machine.name .. "\" now.")
+            if config("dev-mode") then
+                log("Scanning Machine \"" .. Machine.name .. "\" now.")
+            end
             
             if MachineType ~= "rocket-silo" then
                 Machine = AddQuality(Machine)
@@ -175,13 +191,15 @@ for _,MachineType in pairs(MachineTypes) do
                 MachineBanned = true
             end
 
-            if MachineBanned then
+            if MachineBanned and config("dev-mode") then
                 log("Machine \"" .. Machine.name .. "\" is banned from AMS!")
             end
 
             -- Create a new version of all machines which don't have additional module slots.
             if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not MachineBanned ) then
-                log("Creating AMS version of \"" .. Machine.name .. "\" now.")
+                if config("dev-mode") then
+                    log("Creating AMS version of \"" .. Machine.name .. "\" now.")
+                end
                 local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
                 AMSMachine = Localiser(AMSMachine, Machine)
@@ -261,7 +279,9 @@ for _,MachineType in pairs(MachineTypes) do
 
                 if AMSMachineRecipe.ingredients[1]["name"] == nil then
                     AMSMachineRecipe.ingredients[1]["name"] = "electronic-circuit"
-                    log("Had to replace ingredient name for \"" .. AMSMachineRecipe.name .. "\"")
+                    if config("dev-mode") then
+                        log("Had to replace ingredient name for \"" .. AMSMachineRecipe.name .. "\"")
+                    end
                 end
 
                 AMSMachineRecipe.results = {{type = "item", name = AMSMachineItem.name, amount = 1}}
@@ -300,9 +320,11 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineTechnology.effects = {{type = "unlock-recipe", recipe = AMSMachineRecipe.name}}
                 AMSMachineTechnology = Localiser(AMSMachineTechnology, Machine)
 
-                log("Made AMS version of \"" .. Machine.name .. "\".")
+                if config("dev-mode") then
+                    log("Made AMS version of \"" .. Machine.name .. "\".")
+                end
                 data:extend{AMSMachine, AMSMachineItem, AMSMachineRecipe, AMSMachineTechnology}
-            else
+            elseif config("dev-mode") then
                 log("Machine \"" .. Machine.name .. "\" is an AMS machine, AMS machines are turrend off, or this machine is banned. Skipping the AMS machine making process.")
             end
         end
@@ -317,12 +339,18 @@ if config("quality-beacons") then
 end
 
 -- Improve power of all quality modules.
-log("Improving power of all quality modules.")
+if config("dev-mode") then
+    log("Improving power of all quality modules.")
+end
 for _,Module in pairs(data.raw["module"]) do
-    log("Scanning module \"" .. Module.name .. "\" now.")
+    if config("dev-mode") then
+        log("Scanning module \"" .. Module.name .. "\" now.")
+    end
     if Module.effect.quality then
         if Module.effect.quality >= 0 then
-            log("Module \"" .. Module.name .. "\" contians a Quality increase. Increasing bonus.")
+            if config("dev-mode") then
+                log("Module \"" .. Module.name .. "\" contians a Quality increase. Increasing bonus.")
+            end
             Module.effect.quality = Module.effect.quality * config("quality-module-multiplier")
         end
     end

@@ -54,6 +54,12 @@ data:extend{
         setting_type = "startup",
         default_value = true,
         order = "g"
+    },
+    {   name = "qa_dev-mode",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "i"
     }
 }
 if EnableCraftingSpeedFunction then
