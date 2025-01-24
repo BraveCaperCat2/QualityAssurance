@@ -75,6 +75,7 @@ local function AddQuality(Machine)
         end
     end
     local BaseQuality = false
+    NormalProbability = data.raw.quality["normal"].next_probability or 1
     while not BaseQuality do
         if Machine.effect_receiver then
             if Machine.effect_receiver.base_effect then
@@ -83,7 +84,7 @@ local function AddQuality(Machine)
                         if config("dev-mode") then
                             log("Machine does not contain base quality. Adding base quality.")
                         end
-                        Machine.effect_receiver.base_effect.quality = config("base-quality-value") / 100
+                        Machine.effect_receiver.base_effect.quality = config("base-quality-value") / 100 / NormalProbability
                     else
                         if config("dev-mode") then
                             log("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
@@ -172,8 +173,9 @@ for _,MachineType in pairs(MachineTypes) do
             end
             
             if MachineType ~= "rocket-silo" then
-                Machine = AddQuality(Machine)
-
+                if ( not config("ams-base-quality-toggle") ) then
+                    Machine = AddQuality(Machine)
+                end
                 Machine = EnableQuality(Machine)
             else
                 data.raw[MachineType][j].fixed_recipe = nil
@@ -206,6 +208,10 @@ for _,MachineType in pairs(MachineTypes) do
                 local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
                 AMSMachine = Localiser(AMSMachine, Machine)
+
+                if ( config("ams-base-quality-toggle") ) then
+                    AMSMachine = AddQuality(AMSMachine)
+                end
 
                 local AddedModuleSlots = config("added-module-slots")
                 local SpeedMultiplier = 1
@@ -297,22 +303,23 @@ for _,MachineType in pairs(MachineTypes) do
                 local Prerequisite = GetMachineTechnology(Machine)
                 if Prerequisite then
                     AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing", "electronics"}
-                    if data.raw["technology"][Prerequisite].icon and data.raw["technology"][Prerequisite].icon ~= "" then
-                        AMSMachineTechnology.icon = data.raw["technology"][Prerequisite].icon
-                        AMSMachineTechnology.icon_size = data.raw["technology"][Prerequisite].icon_size
-                    elseif data.raw["technology"][Prerequisite].icons and data.raw["technology"][Prerequisite].icons ~= {} then
-                        AMSMachineTechnology.icons = data.raw["technology"][Prerequisite].icons
+                    PrerequisiteTech = data.raw["technology"][Prerequisite]
+                    if PrerequisiteTech.icon and PrerequisiteTech.icon ~= "" then
+                        AMSMachineTechnology.icon = PrerequisiteTech.icon
+                        AMSMachineTechnology.icon_size = PrerequisiteTech.icon_size
+                    elseif PrerequisiteTech.icons and PrerequisiteTech.icons ~= {} then
+                        AMSMachineTechnology.icons = PrerequisiteTech.icons
                     end
-                    if data.raw["technology"][Prerequisite].unit then
-                        AMSMachineTechnology.unit = table.deepcopy(data.raw["technology"][Prerequisite].unit)
+                    if PrerequisiteTech.unit then
+                        AMSMachineTechnology.unit = table.deepcopy(PrerequisiteTech.unit)
                         if AMSMachineTechnology.unit.count then
                             AMSMachineTechnology.unit.count = 2 * AMSMachineTechnology.unit.count
                         elseif AMSMachineTechnology.unit.count_formula then
                             AMSMachineTechnology.unit.count_formula = "2 * (" .. AMSMachineTechnology.unit.count_formula .. ")"
                         end
                         AMSMachineTechnology.research_trigger = nil
-                    elseif data.raw["technology"][Prerequisite].research_trigger then
-                        AMSMachineTechnology.research_trigger = table.deepcopy(data.raw["technology"][Prerequisite].research_trigger)
+                    elseif PrerequisiteTech.research_trigger then
+                        AMSMachineTechnology.research_trigger = table.deepcopy(PrerequisiteTech.research_trigger)
                         AMSMachineTechnology.unit = nil
                     end
                 else
