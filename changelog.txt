@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.5
+Date: 24/01/2025
+  Features:
+    - Added an option - the base quality only affects AMS machines.
+  Bugfixes:
+    - Added normalization to the base quality value. It's finally a percentage. Check the base quality value during a game. It'll probably increse by 10 times and should be the same as in options:)
+  Translation:
+    - Added EN,RU translations for the new option, added RU translation for dev mode option.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.4
 Date: 04/01/2025
   Features:
