@@ -60,6 +60,12 @@ data:extend{
         setting_type = "startup",
         default_value = false,
         order = "i"
+    },
+    {   name = "qa_ams-base-quality-toggle",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "j"
     }
 }
 if EnableCraftingSpeedFunction then
