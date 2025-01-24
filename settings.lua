@@ -33,7 +33,7 @@ data:extend{
         default_value = 10,
         order = "d",
         minimum_value = 1,
-        maximum_value = 32767
+        maximum_value = 32766
     },
     {   name = "qa_quality-beacons",
         type = "bool-setting",

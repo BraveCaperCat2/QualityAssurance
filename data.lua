@@ -175,6 +175,9 @@ for _,MachineType in pairs(MachineTypes) do
                 Machine = AddQuality(Machine)
 
                 Machine = EnableQuality(Machine)
+            else
+                data.raw[MachineType][j].fixed_recipe = nil
+                data.raw[MachineType][j].fixed_quality = nil
             end
 
             data.raw[MachineType][j] = Machine
