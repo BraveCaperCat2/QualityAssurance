@@ -66,6 +66,18 @@ data:extend{
         setting_type = "startup",
         default_value = false,
         order = "j"
+    },
+    {   name = "qa_relabeler",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "k"
+    },
+    {   name = "qa_upcycler",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "l"
     }
 }
 if EnableCraftingSpeedFunction then

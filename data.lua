@@ -341,6 +341,14 @@ for _,MachineType in pairs(MachineTypes) do
     end
 end
 
+if config("relabeler") then
+    -- The relabeler, decreases the quality of an item by 1 tier. Does nothing to normal quality items.
+end
+
+if config("upcycler") then
+    -- The upcycler, has a chance to increase the quality of an item by 1 tier, as well as chances to leave the item as-is and turn the item into scrap.
+end
+
 -- Allow Quality Modules in Beacons.
 if config("quality-beacons") then
     for _,Beacon in pairs(data.raw["beacon"]) do
