@@ -4,3 +4,4 @@ A list of supporters who have helped me develop Quality Assurance.
 - A.Freeman (From the Factorio Mod Portal)
 - wvlad (From the Factorio Mod Portal)
 - plexpt (From Github and the Factorio Mod Portal)
+- Various other people from the factorio community.

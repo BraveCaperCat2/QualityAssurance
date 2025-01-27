@@ -71,13 +71,17 @@ data:extend{
         type = "bool-setting",
         setting_type = "startup",
         default_value = false,
-        order = "k"
+        forced_value = false,
+        order = "k",
+        hidden = true
     },
     {   name = "qa_upcycler",
         type = "bool-setting",
         setting_type = "startup",
         default_value = false,
-        order = "l"
+        forced_value = false,
+        order = "l",
+        hidden = true
     }
 }
 if EnableCraftingSpeedFunction then

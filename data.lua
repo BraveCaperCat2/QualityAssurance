@@ -209,7 +209,7 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
                 AMSMachine = Localiser(AMSMachine, Machine)
 
-                if ( config("ams-base-quality-toggle") ) then
+                if config("ams-base-quality-toggle") then
                     AMSMachine = AddQuality(AMSMachine)
                 end
 
@@ -343,10 +343,47 @@ end
 
 if config("relabeler") then
     -- The relabeler, decreases the quality of an item by 1 tier. Does nothing to normal quality items.
+    if config("dev-mode") then
+        log("Creating machine \"qa_relabeler\"")
+    end
+    local RelabelerMachine = table.deepcopy(data.raw["furnace"]["recycler"])
+    RelabelerMachine.name = "qa_relabeler"
+    RelabelerMachine.crafting_categories = {"relabeling"}
+    RelabelerMachine.module_slots = 4
+    RelabelerMachine.result_inventory_size = 1
+    RelabelerMachine.cant_insert_at_source_message_key = "inventory-restriction.cant-be-relabeled"
+    RelabelerMachine["minable"] = RelabelerMachine["minable"] or {mining_time = 1}
+    RelabelerMachine.minable.results = nil
+    RelabelerMachine.minable.result = RelabelerMachine.name
+    RelabelerMachine.minable.count = 1
+
+    local RelabelerItem = table.deepcopy(data.raw["item"]["recycler"])
+    RelabelerItem.name = RelabelerMachine.name
+    RelabelerItem.stack_size = 50
+    RelabelerItem.place_result = RelabelerMachine.name
+    RelabelerMachine.MachineItem = RelabelerItem.name
+
+    local RelabelerRecipe = {}
+    RelabelerRecipe.name = RelabelerItem.name
+    RelabelerRecipe.type = "recipe"
+    RelabelerRecipe.ingredients = {{type = "item", name = "electronic-circuit", amount = 25}, {type = "item", name = "advanced-circuit", amount = 10}, {type = "item", name = "steel-plate", amount = 30}, {type = "item", name = "iron-gear-wheel", amount = 15}}
+    RelabelerRecipe.results = {{type = "item", name = RelabelerItem.name, amount = 1}}
+    RelabelerRecipe.category = "crafting"
+    RelabelerRecipe.enabled = false
+
+    local RelabelerTechnology = table.deepcopy(data.raw["technology"]["recycling"])
+    RelabelerTechnology.name = RelabelerReipe.name
+    RelabelerTechnology.prerequisites = {"quality-module", "electronics", "advanced-circuit", "steel-processing"}
+    RelabelerTechnology.effects = {{type = "unlock-recipe", recipe = RelabelerRecipe.name}}
+    RelabelerTechnology.unit = {count = 700, ingredients = {{"automation-science-pack", 1}, {"logistic-science-pack", 1}}, time = 45}
+    RelabelerTechnology.research_trigger = nil
 end
 
 if config("upcycler") then
     -- The upcycler, has a chance to increase the quality of an item by 1 tier, as well as chances to leave the item as-is and turn the item into scrap.
+    if config("dev-mode") then
+        log("Creating machine \"qa_upcycler\"")
+    end
 end
 
 -- Allow Quality Modules in Beacons.
