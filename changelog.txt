@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.6
+Date: 18/03/2025
+  Features:
+    - Added a "hand-curated" block-list for rocket silos to support all qualities.
+    - Added an opt-out for rocket silos to support all qualities.
+  Bugfixes:
+    - Fixed an issue where modded rocket silos would become unusable due to custom rocket part recipes being hidden
+    - Fixed an issue where modded "rocket silos" with free rocket part "recipes" would gain access to quality ingredients despite not having any to begin with.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.5
 Date: 24/01/2025
   Features:

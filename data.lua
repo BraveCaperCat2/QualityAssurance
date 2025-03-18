@@ -8,6 +8,9 @@ end
 -- A list of entity names to be skipped over when creating AMS machines.
 local AMSBlocklist = {"awesome-sink-gui"}
 
+-- A list of entity names to be skipped over when modifying the fixed_recipe and fixed_quality properties.
+local UnfixedRSRBlocklist = {""}
+
 function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     -- low2 + (value - low1) * (high2 - low2) / (high1 - low1) Provided by "mmmPI" on the factorio forums. Thank you. (If I ever add a supporters list, you'll be on it!)
     return 0.01 + (ModuleSlotDifference - ( -10 )) * (100 - 0.01) / ( 10 - ( -10 ))
