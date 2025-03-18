@@ -168,7 +168,50 @@ end
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
+
+            local AMSBanned = false
+            local UnfixedRSRBanned = false
+
+            for _,EntityName in pairs(AMSBlocklist) do
+                if Machine.name == EntityName then
+                    AMSBanned = true
+                end
+            end
+
+            for _,EntityName in pairs(UnfixedRSRBlocklist) do
+                if Machine.name == EntityName then
+                    UnfixedRSRBanned = true
+                end
+            end
+
+            if Machine.no_ams == true then
+                AMSBanned = true
+            end
+
+            if Machine.no_unfixed_rsr == true then
+                UnfixedRSRBanned = true
+            end
+
+            if MachineType == "rocket-silo" then
+                if data.raw["recipe"][Machine.fixed_recipe].ingredients == {} then
+                    UnfixedRSRBanned = true
+                end
+                if data.raw["recipe"][Machine.fixed_recipe].hidden then
+                    data.raw["recipe"][Machine.fixed_recipe].hidden = false
+                    data.raw["recipe"][Machine.fixed_recipe].hidden_in_factoriopedia = true
+                    data.raw["recipe"][Machine.fixed_recipe].hide_from_player_crafting = true
+                end
+            end
+
             if config("dev-mode") then
+                if AMSBanned then
+                    log("Machine \"" .. Machine.name .. "\" is banned from AMS!")
+                end
+                
+                if UnfixedRSRBanned then
+                    log("Machine \"" .. Machine.name .. "\" is banned from Unfixed Rocket Silo Recipes!")
+                end
+
                 log("Scanning Machine \"" .. Machine.name .. "\" now.")
             end
             
@@ -177,31 +220,15 @@ for _,MachineType in pairs(MachineTypes) do
                     Machine = AddQuality(Machine)
                 end
                 Machine = EnableQuality(Machine)
-            else
+            elseif not UnfixedRSRBanned then
                 data.raw[MachineType][j].fixed_recipe = nil
                 data.raw[MachineType][j].fixed_quality = nil
             end
 
             data.raw[MachineType][j] = Machine
 
-            local MachineBanned = false
-
-            for _,EntityName in pairs(AMSBlocklist) do
-                if Machine.name == EntityName then
-                    MachineBanned = true
-                end
-            end
-
-            if Machine.no_ams == true then
-                MachineBanned = true
-            end
-
-            if MachineBanned and config("dev-mode") then
-                log("Machine \"" .. Machine.name .. "\" is banned from AMS!")
-            end
-
             -- Create a new version of all machines which don't have additional module slots.
-            if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not MachineBanned ) then
+            if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not AMSBanned ) then
                 if config("dev-mode") then
                     log("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 end
