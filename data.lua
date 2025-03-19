@@ -9,7 +9,7 @@ end
 local AMSBlocklist = {"awesome-sink-gui"}
 
 -- A list of entity names to be skipped over when modifying the fixed_recipe and fixed_quality properties.
-local UnfixedRSRBlocklist = {""}
+local UnfixedRSRBlocklist = {"planet-hopper-launcher"}
 
 function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     -- low2 + (value - low1) * (high2 - low2) / (high1 - low1) Provided by "mmmPI" on the factorio forums. Thank you. (If I ever add a supporters list, you'll be on it!)
@@ -196,10 +196,16 @@ for _,MachineType in pairs(MachineTypes) do
             end
 
             if MachineType == "rocket-silo" then
-                if data.raw["recipe"][Machine.fixed_recipe].ingredients == {} then
+                if config("dev-mode") then
+                    if data.raw["recipe"][Machine.fixed_recipe] == nil then
+                        log("Parts recipe is nil, rocket silo data: " .. serpent.block(Machine))
+                    end
+                    log("Machine \"" .. Machine.name .. "\" is a rocket silo. Parts recipe: \"" .. ((data.raw["recipe"] == nil) and serpent.block(data.raw["recipe"][Machine.fixed_recipe]) or "nil") .. "\". The machine is " .. ((not UnfixedRSRBanned) and "" or "not ") .. "banned from Unfixed Rocket Silo Recipes.")
+                end
+                if data.raw["recipe"][Machine.fixed_recipe] and data.raw["recipe"][Machine.fixed_recipe].ingredients == {} then
                     UnfixedRSRBanned = true
                 end
-                if data.raw["recipe"][Machine.fixed_recipe].hidden then
+                if data.raw["recipe"][Machine.fixed_recipe] and data.raw["recipe"][Machine.fixed_recipe].hidden then
                     data.raw["recipe"][Machine.fixed_recipe].hidden = false
                     data.raw["recipe"][Machine.fixed_recipe].hidden_in_factoriopedia = true
                     data.raw["recipe"][Machine.fixed_recipe].hide_from_player_crafting = true

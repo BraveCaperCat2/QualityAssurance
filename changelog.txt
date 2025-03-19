@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.6
-Date: 18/03/2025
+Date: 19/03/2025
   Features:
     - Added a "hand-curated" block-list for rocket silos to support all qualities.
     - Added an opt-out for rocket silos to support all qualities.
