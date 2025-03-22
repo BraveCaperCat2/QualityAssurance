@@ -335,7 +335,15 @@ for _,MachineType in pairs(MachineTypes) do
                 -- Thank you, A.Freeman (from the mod portal) for providing me this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
                 local Prerequisite = GetMachineTechnology(Machine)
                 if Prerequisite then
-                    AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing", "electronics"}
+                    if Prerequisite ~= "steel-processing" and Prerequisite ~= "electronics" then
+                        AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing", "electronics"}
+                    elseif Prerequisite == "steel-processing" and Prerequisite ~= "electronics" then
+                        AMSMachineTechnology.prerequisites = {Prerequisite, "electronics"}
+                    elseif Prerequisite ~= "steel-processing" and Prerequisite == "electronics" then
+                        AMSMachineTechnology.prerequisites = {Prerequisite, "steel-processing"}
+                    else
+                        AMSMachineTechnology.prerequisites = {Prerequisite}
+                    end
                     PrerequisiteTech = data.raw["technology"][Prerequisite]
                     if PrerequisiteTech.icon and PrerequisiteTech.icon ~= "" then
                         AMSMachineTechnology.icon = PrerequisiteTech.icon
