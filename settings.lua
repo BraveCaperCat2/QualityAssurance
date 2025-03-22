@@ -1,4 +1,5 @@
 EnableCraftingSpeedFunction = false
+MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
 data:extend{
     {   name = "qa_base-quality",
@@ -107,4 +108,23 @@ else
         hidden = true
     }
 }
+end
+
+for _,MachineType in pairs(MachineTypes) do
+    data:extend{
+        {
+            name = "qa_enable-ams-" .. MachineType,
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "m[" .. MachineType .. "]"
+        },
+        {
+            name = "qa_enable-base-quality-" .. MachineType,
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "n[" .. MachineType .. "]"
+        }
+    }
 end

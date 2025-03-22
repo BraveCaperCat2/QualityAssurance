@@ -2,7 +2,10 @@ EnableCraftingSpeedFunction = false
 
 -- Returns the value of the setting with the provided name. Prefix should not be provided.
 local function config(name)
-    return settings.startup['qa_' .. name].value
+    if settings.startup['qa_' .. name] then
+        return settings.startup['qa_' .. name].value
+    end
+    return nil
 end
 
 -- A list of entity names to be skipped over when creating AMS machines.
@@ -222,7 +225,7 @@ for _,MachineType in pairs(MachineTypes) do
             end
             
             if MachineType ~= "rocket-silo" then
-                if ( not config("ams-base-quality-toggle") ) then
+                if (not config("ams-base-quality-toggle")) and config("enable-base-quality-" .. MachineType) then
                     Machine = AddQuality(Machine)
                 end
                 Machine = EnableQuality(Machine)
@@ -234,7 +237,7 @@ for _,MachineType in pairs(MachineTypes) do
             data.raw[MachineType][j] = Machine
 
             -- Create a new version of all machines which don't have additional module slots.
-            if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not AMSBanned ) then
+            if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not AMSBanned ) and (config("enable-ams-" .. MachineType)) then
                 if config("dev-mode") then
                     log("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 end
