@@ -89,7 +89,8 @@ data:extend{
         type = "string-setting",
         setting_type = "startup",
         default_value = "",
-        order = "o"
+        order = "o",
+        allow_blank = true
     }
 }
 if EnableCraftingSpeedFunction then
