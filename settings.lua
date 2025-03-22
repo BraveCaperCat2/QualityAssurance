@@ -83,6 +83,13 @@ data:extend{
         forced_value = false,
         order = "l",
         hidden = true
+    },
+    {
+        name = "qa_early-quality-filter",
+        type = "string-setting",
+        setting_type = "startup",
+        default_value = "",
+        order = "o"
     }
 }
 if EnableCraftingSpeedFunction then

@@ -1,5 +1,35 @@
+-- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
 local function config(name)
-    return settings.startup['qa_' .. name].value
+    if settings.startup['qa_' .. name] then
+        return settings.startup['qa_' .. name].value
+    end
+    return nil
+end
+
+-- Splits a string by a pattern.
+function Split(str, delim, maxNb)
+    if string.find(str, delim) == nil then
+        return { str }
+    end
+    if maxNb == nil or maxNb < 1 then
+        maxNb = 0
+    end
+    local result = {}
+    local pat = "(.-)" .. delim .. "()"
+    local nb = 0
+    local lastPos
+    for part, pos in string.gfind(str, pat) do
+        nb = nb + 1
+        result[nb] = part
+        lastPos = pos
+        if nb == maxNb then
+            break
+        end
+    end
+    if nb ~= maxNb then
+        result[nb + 1] = string.sub(str, lastPos)
+    end
+    return result
 end
 
 -- Add all qualities to the selected Technology, and remove technologies with no effect.
@@ -27,7 +57,16 @@ for i,Technology in pairs(data.raw["technology"]) do
                     if config("dev-mode") then
                         log("Effect is a match! Testing for quality forward movement now.")
                     end
+                    local EarlyQualityFilter = config("early-quality-filter")
                     local MoveQuality = true
+                    if EarlyQualityFilter ~= "" then
+                        MoveQuality = false
+                        for _,EarlyQuality in pairs(Split(EarlyQualityFilter, ",%w*")) do
+                            if string.lower(Effect.quality) == string.lower(EarlyQuality) then
+                                MoveQuality = true
+                            end
+                        end
+                    end
                     if QualityTechnologyName == "rocket-silo" or QualityTechnologyName == "quality-module-2" or QualityTechnologyName == "quality-module-3" then
                         if Effect.quality == "uncommon" or Effect.quality == "rare" then
                             MoveQuality = false
