@@ -197,10 +197,7 @@ for _,MachineType in pairs(MachineTypes) do
 
             if MachineType == "rocket-silo" then
                 if config("dev-mode") then
-                    if data.raw["recipe"][Machine.fixed_recipe] == nil then
-                        log("Parts recipe is nil, rocket silo data: " .. serpent.block(Machine))
-                    end
-                    log("Machine \"" .. Machine.name .. "\" is a rocket silo. Parts recipe: \"" .. ((data.raw["recipe"] == nil) and serpent.block(data.raw["recipe"][Machine.fixed_recipe]) or "nil") .. "\". The machine is " .. ((not UnfixedRSRBanned) and "" or "not ") .. "banned from Unfixed Rocket Silo Recipes.")
+                    log("Checking for rocket silo \"" .. Machine.name .. "\" for being banned from Unfixed Rocket Silo Recipes.")
                 end
                 if data.raw["recipe"][Machine.fixed_recipe] and data.raw["recipe"][Machine.fixed_recipe].ingredients == {} then
                     UnfixedRSRBanned = true
