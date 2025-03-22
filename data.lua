@@ -1,6 +1,6 @@
 EnableCraftingSpeedFunction = false
 
--- Returns the value of the setting with the provided name. Prefix should not be provided.
+-- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
 local function config(name)
     if settings.startup['qa_' .. name] then
         return settings.startup['qa_' .. name].value

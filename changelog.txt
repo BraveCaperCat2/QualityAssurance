@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.7
 Date: 22/03/2025
+  Features:
+    - Added options to disable AMS Machines and Base Quality on specific machine types.
   Bugfixes:
     - Fixed an issue where mods which append unlocking machines to electronics or steel processing would crash the game.
 ---------------------------------------------------------------------------------------------------
