@@ -269,15 +269,11 @@ end
 
 local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
-if config("dev-mode") then
-    log("Initiating more operations on automated crafting.")
-end
+LogWrap("Initiating more operations on automated crafting.")
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] ~= nil then
         for j,Machine in pairs(data.raw[MachineType]) do
-            if config("dev-mode") then
-                log("Re-scanning Machine \"" .. Machine.name .. "\" now.")
-            end
+            LogWrap("Re-scanning Machine \"" .. Machine.name .. "\" now.")
 
             if string.find(Machine.name, "qa_") then
 
