@@ -9,7 +9,7 @@ local function config(name)
 end
 
 local EnableLog = config("dev-mode")
-function LogWrap(str)
+function CondLog(str)
     if EnableLog then
         log(str)
     end
@@ -66,17 +66,17 @@ end
 local function AddQuality(Machine)
     -- Increase quality for a machine.
     if not config("base-quality") then
-        LogWrap("Base Quality setting is disabled. Skipping.")
+        CondLog("Base Quality setting is disabled. Skipping.")
         return Machine
     end
 
     if not config("moduleless-quality") then
         if Machine.module_slots == nil then
-            LogWrap("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+            CondLog("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
             return Machine
         else
             if Machine.module_slots == 0 then
-                LogWrap("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
+                CondLog("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
                 return Machine
             end
         end
@@ -88,14 +88,14 @@ local function AddQuality(Machine)
             if Machine.effect_receiver.base_effect then
                 if Machine.effect_receiver.base_effect.quality then
                     if Machine.effect_receiver.base_effect.quality == 0 then
-                        LogWrap("Machine does not contain base quality. Adding base quality.")
+                        CondLog("Machine does not contain base quality. Adding base quality.")
                         Machine.effect_receiver.base_effect.quality = config("base-quality-value") / 100 / NormalProbability
                     else
-                        LogWrap("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
+                        CondLog("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
                     end
                     BaseQuality = true
                 else
-                    LogWrap("Machine does not contain base quality. Preparing to add base quality.")
+                    CondLog("Machine does not contain base quality. Preparing to add base quality.")
                     Machine.effect_receiver.base_effect.quality = 0
                 end
             else
@@ -163,7 +163,7 @@ end
 -- Perform operations on automated crafting.
 local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
-LogWrap("Performing operations on Automated Crafting.")
+CondLog("Performing operations on Automated Crafting.")
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
@@ -192,7 +192,7 @@ for _,MachineType in pairs(MachineTypes) do
             end
 
             if MachineType == "rocket-silo" then
-                LogWrap("Checking for rocket silo \"" .. Machine.name .. "\" for being banned from Unfixed Rocket Silo Recipes.")
+                CondLog("Checking for rocket silo \"" .. Machine.name .. "\" for being banned from Unfixed Rocket Silo Recipes.")
                 if data.raw["recipe"][Machine.fixed_recipe] and data.raw["recipe"][Machine.fixed_recipe].ingredients == {} then
                     UnfixedRSRBanned = true
                 end
@@ -229,7 +229,7 @@ for _,MachineType in pairs(MachineTypes) do
 
             -- Create a new version of all machines which don't have additional module slots.
             if ( not string.find(Machine.name, "qa_") ) and config("ams-machines-toggle") and ( not AMSBanned ) and (config("enable-ams-" .. MachineType)) then
-                LogWrap("Creating AMS version of \"" .. Machine.name .. "\" now.")
+                CondLog("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
                 AMSMachine = Localiser(AMSMachine, Machine)
@@ -313,7 +313,7 @@ for _,MachineType in pairs(MachineTypes) do
 
                 if AMSMachineRecipe.ingredients[1]["name"] == nil then
                     AMSMachineRecipe.ingredients[1]["name"] = "electronic-circuit"
-                    LogWrap("Had to replace ingredient name for \"" .. AMSMachineRecipe.name .. "\"")
+                    CondLog("Had to replace ingredient name for \"" .. AMSMachineRecipe.name .. "\"")
                 end
 
                 AMSMachineRecipe.results = {{type = "item", name = AMSMachineItem.name, amount = 1}}
@@ -361,10 +361,10 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachineTechnology.effects = {{type = "unlock-recipe", recipe = AMSMachineRecipe.name}}
                 AMSMachineTechnology = Localiser(AMSMachineTechnology, Machine)
 
-                LogWrap("Made AMS version of \"" .. Machine.name .. "\".")
+                CondLog("Made AMS version of \"" .. Machine.name .. "\".")
                 data:extend{AMSMachine, AMSMachineItem, AMSMachineRecipe, AMSMachineTechnology}
             else
-                LogWrap("Machine \"" .. Machine.name .. "\" is an AMS machine, AMS machines are turrend off, or this machine is banned. Skipping the AMS machine making process.")
+                CondLog("Machine \"" .. Machine.name .. "\" is an AMS machine, AMS machines are turrend off, or this machine is banned. Skipping the AMS machine making process.")
             end
         end
     end
@@ -372,7 +372,7 @@ end
 
 if config("relabeler") then
     -- The relabeler, decreases the quality of an item by 1 tier. Does nothing to normal quality items.
-    LogWrap("Creating machine \"qa_relabeler\"")
+    CondLog("Creating machine \"qa_relabeler\"")
     local RelabelerMachine = table.deepcopy(data.raw["furnace"]["recycler"])
     RelabelerMachine.name = "qa_relabeler"
     RelabelerMachine.crafting_categories = {"relabeling"}
@@ -408,7 +408,7 @@ end
 
 if config("upcycler") then
     -- The upcycler, has a chance to increase the quality of an item by 1 tier, as well as chances to leave the item as-is and turn the item into scrap.
-    LogWrap("Creating machine \"qa_upcycler\"")
+    CondLog("Creating machine \"qa_upcycler\"")
 end
 
 -- Allow Quality Modules in Beacons.
@@ -419,12 +419,12 @@ if config("quality-beacons") then
 end
 
 -- Improve power of all quality modules.
-LogWrap("Improving power of all quality modules.")
+CondLog("Improving power of all quality modules.")
 for _,Module in pairs(data.raw["module"]) do
-    LogWrap("Scanning module \"" .. Module.name .. "\" now.")
+    CondLog("Scanning module \"" .. Module.name .. "\" now.")
     if Module.effect.quality then
         if Module.effect.quality >= 0 then
-            LogWrap("Module \"" .. Module.name .. "\" contians a Quality increase. Increasing bonus.")
+            CondLog("Module \"" .. Module.name .. "\" contians a Quality increase. Increasing bonus.")
             Module.effect.quality = Module.effect.quality * config("quality-module-multiplier")
         end
     end
