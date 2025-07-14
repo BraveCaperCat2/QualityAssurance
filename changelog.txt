@@ -7,6 +7,7 @@ Date: 05/07/2025
     - Refactored log calls in debug mode.
   Bugfixes:
     - Fixed an issue where a technology with a legendary-quality prerequisite incorrectly received an epic-quality prerequisite after both quality-related technologies were removed.
+    - Fixed an issue where certain entities which probably shouldn't have an AMS version did have an AMS version.
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.7
 Date: 22/03/2025
