@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.8
 Date: 05/07/2025
+  Features:
+    - Added a "hand-curated" block-list for machines to have base quality.
+    - Added an opt-out for machines to have base quality.
   Changes:
     - Updated the quality movement algorithm.
     - The early quality filter setting now takes the latest quality from the provided list—qualities up to it will be unlocked by the selected technology.
