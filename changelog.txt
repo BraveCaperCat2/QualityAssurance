@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.8
+Date: 05/07/2025
+  Changes:
+    - Updated the quality movement algorithm.
+    - The early quality filter setting now takes the latest quality from the provided list—qualities up to it will be unlocked by the selected technology.
+    - Refactored log calls in debug mode.
+  Bugfixes:
+    - Fixed an issue where a technology with a legendary-quality prerequisite incorrectly received an epic-quality prerequisite after both quality-related technologies were removed.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.7
 Date: 22/03/2025
   Features:
