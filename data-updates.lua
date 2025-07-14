@@ -36,7 +36,7 @@ function Split(str, delim, maxNb)
 end
 
 local EnableLog = config("dev-mode")
-function LogWrap(str)
+function CondLog(str)
     if EnableLog then
         log(str)
     end
@@ -146,7 +146,7 @@ local QualityTechOrder = Order[QualityTechnologyName]
 local EarlyQualityFilter = Split(config("early-quality-filter"), ",%w*")
 local EarlyQualityLevel = 0
 local EarlyQualityName = nil
-LogWrap("EarlyQualityFilter string: " .. config("early-quality-filter") .. " filter: " .. serpent.block(EarlyQualityFilter))
+CondLog("EarlyQualityFilter string: " .. config("early-quality-filter") .. " filter: " .. serpent.block(EarlyQualityFilter))
 for i,Name in pairs(EarlyQualityFilter) do
     local name = string.lower(Name)
     if Qualities[name] ~= nil and EarlyQualityLevel < Qualities[name].level then
@@ -176,7 +176,7 @@ function MoveQualities(Technology)
                 table.insert(Technologies[QualityTechnologyName].effects, Effect)
                 Technology.effects[j] = nil
                 Moved = true
-                LogWrap("Moved quality \"" .. Effect.quality .. "\" to Technology \"" .. QualityTechnologyName .. "\"")
+                CondLog("Moved quality \"" .. Effect.quality .. "\" to Technology \"" .. QualityTechnologyName .. "\"")
             else
                 local Values = table.concat({tostring(QualityTechOrder), tostring(TechOrder), tostring(Qualities[Effect.quality].level), tostring(EarlyQualityLevel)}, " ")
                 if QualityTechOrder <= TechOrder and Qualities[EarlyQualityName] and Qualities[EarlyQualityName].next == Effect.quality then
@@ -192,11 +192,11 @@ function MoveQualities(Technology)
                     if not Contains then
                         table.insert(Technology.prerequisites, QualityTechnologyName)
                         table.insert(Prerequisites[QualityTechnologyName], Technology.name)
-                        LogWrap("Skipped quality \"" .. Effect.quality .. "\" with order/level values: " .. Values)
-                        LogWrap("Added prerequisite \"" .. QualityTechnologyName .. "\" to Technology \"" .. Technology.name .. "\"")
+                        CondLog("Skipped quality \"" .. Effect.quality .. "\" with order/level values: " .. Values)
+                        CondLog("Added prerequisite \"" .. QualityTechnologyName .. "\" to Technology \"" .. Technology.name .. "\"")
                     end
                 else
-                    LogWrap("Skipped quality \"" .. Effect.quality .. "\" because of wrong order/level values: " .. Values)
+                    CondLog("Skipped quality \"" .. Effect.quality .. "\" because of wrong order/level values: " .. Values)
                 end
             end
         end
@@ -207,15 +207,15 @@ function MoveQualities(Technology)
     return Moved
 end
 
-LogWrap("Adding Quality unlocks to \"".. QualityTechnologyName .."\" technology.")
+CondLog("Adding Quality unlocks to \"".. QualityTechnologyName .."\" technology.")
 -- TechnologiesToBeRemoved is a table that will contain TechName:Tech pairs
 local TechnologiesToBeRemoved = {}
 for i,Technology in pairs(data.raw["technology"]) do
     if Technology.name ~= QualityTechnologyName then
-        LogWrap("Technology \"" .. Technology.name .. "\" has effects: " .. ListToString(Technology.effects))
+        CondLog("Technology \"" .. Technology.name .. "\" has effects: " .. ListToString(Technology.effects))
         if MoveQualities(Technology) then
             if Technology.effects == nil or #Technology.effects == 0 then
-                LogWrap("All effects of Technology \"" .. Technology.name .. "\" have been moved.")
+                CondLog("All effects of Technology \"" .. Technology.name .. "\" have been moved.")
                 TechnologiesToBeRemoved[Technology.name] = Technology
             end
         end
@@ -230,7 +230,7 @@ end
 -- Remove Prerequisite from Tech.prerequisites
 -- Add Prerequisite.prerequisites to Tech.Prerequisites
 -- Remove Prerequisite technology
-LogWrap("Technologies to be removed: " .. ListToString(TechnologiesToBeRemoved))
+CondLog("Technologies to be removed: " .. ListToString(TechnologiesToBeRemoved))
 for PrerequisiteName,Prerequisite in pairs(TechnologiesToBeRemoved) do
     -- Prerequisite is to be removed
     for _,TechName in pairs(Prerequisites[PrerequisiteName]) do
@@ -269,11 +269,11 @@ end
 
 local MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
-LogWrap("Initiating more operations on automated crafting.")
+CondLog("Initiating more operations on automated crafting.")
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] ~= nil then
         for j,Machine in pairs(data.raw[MachineType]) do
-            LogWrap("Re-scanning Machine \"" .. Machine.name .. "\" now.")
+            CondLog("Re-scanning Machine \"" .. Machine.name .. "\" now.")
 
             if string.find(Machine.name, "qa_") then
 
