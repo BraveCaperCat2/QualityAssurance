@@ -9,7 +9,7 @@ local function config(name)
 end
 
 -- A list of entity names to be skipped over when creating AMS machines.
-local AMSBlocklist = {"awesome-sink-gui"}
+local AMSBlocklist = {"awesome-sink-gui", "oil_rig_migration"}
 
 -- A list of entity names to be skipped over when modifying the fixed_recipe and fixed_quality properties.
 local UnfixedRSRBlocklist = {"planet-hopper-launcher"}
