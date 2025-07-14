@@ -21,6 +21,9 @@ local AMSBlocklist = {"awesome-sink-gui", "oil_rig_migration", "elevated-pipe", 
 -- A list of entity names to be skipped over when modifying the fixed_recipe and fixed_quality properties.
 local UnfixedRSRBlocklist = {"planet-hopper-launcher"}
 
+-- A list of entity names to be skipped over when adding Base Quality.
+local BaseQualityBlockList = {}
+
 function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     -- low2 + (value - low1) * (high2 - low2) / (high1 - low1) Provided by "mmmPI" on the factorio forums. Thank you. (If I ever add a supporters list, you'll be on it!)
     return 0.01 + (ModuleSlotDifference - ( -10 )) * (100 - 0.01) / ( 10 - ( -10 ))
@@ -170,6 +173,7 @@ for _,MachineType in pairs(MachineTypes) do
 
             local AMSBanned = false
             local UnfixedRSRBanned = false
+            local BaseQualityBanned = false
 
             for _,EntityName in pairs(AMSBlocklist) do
                 if Machine.name == EntityName then
@@ -183,12 +187,22 @@ for _,MachineType in pairs(MachineTypes) do
                 end
             end
 
+            for _,EntityName in pairs(BaseQualityBlockList) do
+                if Machine.name == EntityName then
+                    BaseQualityBanned = true
+                end
+            end
+
             if Machine.no_ams == true then
                 AMSBanned = true
             end
 
             if Machine.no_unfixed_rsr == true then
                 UnfixedRSRBanned = true
+            end
+
+            if Machine.no_bq == true then
+                BaseQualityBanned = true
             end
 
             if MachineType == "rocket-silo" then
@@ -203,20 +217,22 @@ for _,MachineType in pairs(MachineTypes) do
                 end
             end
 
-            if config("dev-mode") then
-                if AMSBanned then
-                    log("Machine \"" .. Machine.name .. "\" is banned from AMS!")
-                end
-                
-                if UnfixedRSRBanned then
-                    log("Machine \"" .. Machine.name .. "\" is banned from Unfixed Rocket Silo Recipes!")
-                end
-
-                log("Scanning Machine \"" .. Machine.name .. "\" now.")
+            if AMSBanned then
+                CondLog("Machine \"" .. Machine.name .. "\" is banned from AMS!")
             end
             
+            if UnfixedRSRBanned then
+                CondLog("Machine \"" .. Machine.name .. "\" is banned from Unfixed Rocket Silo Recipes!")
+            end
+
+            if BaseQualityBanned then
+                CondLog("Machine \"" .. Machine.name .. "\" is banned from Base Quality Addition!")
+            end
+
+            CondLog("Scanning Machine \"" .. Machine.name .. "\" now.")
+            
             if MachineType ~= "rocket-silo" then
-                if (not config("ams-base-quality-toggle")) and config("enable-base-quality-" .. MachineType) then
+                if (not config("ams-base-quality-toggle")) and config("enable-base-quality-" .. MachineType) and (not BaseQualityBanned) then
                     Machine = AddQuality(Machine)
                 end
                 Machine = EnableQuality(Machine)
