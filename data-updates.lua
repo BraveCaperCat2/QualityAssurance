@@ -73,8 +73,8 @@ local function CleanNils(t)
     return ans
 end
 
-local function NotEmpty(f)
-    return f ~= nil and f ~= {} and f ~= ""
+local function Empty(f)
+    return f == nil or f == {} or f == ""
 end
 
 local Technologies = data.raw["technology"]
@@ -109,12 +109,19 @@ function UpdateOrder(Tech)
         Technology = Technologies[Tech]
         Name = Tech
     end
-    if Order[Name] > 0 then
+    if Order[Name] > 0 or Empty(Technology.prerequisites) then
         -- Order was initialized
         return Order[Name]
     end
+    if Order[Name] == -1 then
+        CondLog("Found dependency cycle for tech " .. Name)
+        return 0
+    end
     if type(Technology.prerequisites) == "table" then
+        -- CondLog(Name .. " prerequisites: " .. ListToString(Technology.prerequisites))
         local max = 0
+        -- Mark as visited to prevent cycling
+        Order[Name] = -1
         for _,Prerequisite in pairs(Technology.prerequisites) do
             local order = UpdateOrder(Prerequisite)
             if order + 1 > max then
@@ -123,6 +130,7 @@ function UpdateOrder(Tech)
         end
         Order[Name] = max
     end
+    -- CondLog(Name .. " has order " .. tostring(Order[Name]))
     return Order[Name]
 end
 
@@ -242,7 +250,7 @@ for PrerequisiteName,Prerequisite in pairs(TechnologiesToBeRemoved) do
                 -- Remove Prerequisite from Tech.prerequisites
                 table.remove(Tech.prerequisites, p)
                 -- Add dependencies from Prerequisite to Tech
-                if NotEmpty(Prerequisite.prerequisites) then
+                if not Empty(Prerequisite.prerequisites) then
                     for _,AddDependencyName in pairs(Prerequisite.prerequisites) do
                         table.insert(AddDependencies, AddDependencyName)
                     end
