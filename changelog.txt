@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.10
+Date: 13/08/2025
+  Bugfixes:
+    - Fixed an issue where the AMS version of the captive biter spawner would have incorrect ingredients.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.9
 Date: 17/07/2025
   Bugfixes:
