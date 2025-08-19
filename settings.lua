@@ -1,4 +1,5 @@
-EnableCraftingSpeedFunction = false
+local EnableCraftingSpeedFunction = true
+local EnableRelabelerAndUpcycler = false -- Causes a crash if enabled, because the relabeler and upcycler are not functional yet.
 MachineTypes = {"crafting-machine", "furnace", "assembling-machine", "mining-drill", "rocket-silo"}
 
 data:extend{
@@ -68,22 +69,6 @@ data:extend{
         default_value = false,
         order = "j"
     },
-    {   name = "qa_relabeler",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        forced_value = false,
-        order = "k",
-        hidden = true
-    },
-    {   name = "qa_upcycler",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        forced_value = false,
-        order = "l",
-        hidden = true
-    },
     {
         name = "qa_early-quality-filter",
         type = "string-setting",
@@ -116,6 +101,42 @@ else
         hidden = true
     }
 }
+end
+
+if EnableRelabelerAndUpcycler then
+    data:extend{
+        {   name = "qa_relabeler",
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "k"
+        },
+        {   name = "qa_upcycler",
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "l"
+        }
+    }
+else
+    data:extend{
+        {   name = "qa_relabeler",
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = false,
+            forced_value = false,
+            order = "k",
+            hidden = true
+        },
+        {   name = "qa_upcycler",
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = false,
+            forced_value = false,
+            order = "l",
+            hidden = true
+        }
+    }
 end
 
 for _,MachineType in pairs(MachineTypes) do

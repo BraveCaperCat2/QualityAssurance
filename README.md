@@ -9,3 +9,5 @@ Quality Assurance (Shorthand QA) is a mod which adds multiple things related to 
 + Improving Quality Modules - Multiplies the quality effect of all quality modules, so you don't need to wait extremely long to get your high-quality items.
 + Quality Modules in Beacons - Allows you to place Quality Modules in beacons.
 + Everything is configurable - Most likely the best feature of the mod, all of the above features are fully configurable, or at least they should be.
+
+If you encounter **any** issues, please turn on dev mode, load up the game and then send me a helpful message describing the issue as well as the factorio log file (can be uploaded in any way).

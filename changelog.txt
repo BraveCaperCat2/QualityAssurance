@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.0
+Date: 19/08/2025
+  Features:
+    - Added back the setting to change the added module slots in AMS machines.
+      You can even set the setting to a negative number to remove module slots where possible.
+  Changes:
+    - Almost finished working on 2 new (completely new, not just upgrades of original machines) quality-related machines.
+      It only requires unhiding and unlocking the settings for them and implementing a fix for the crashes which will happen if you try to enable them yourself.
+    - Unstopped working on the previously mentioned new machines, at least temporarily.
+    - Replaced the code that decided how much faster or slower AMS machines are compared to their non-AMS conterparts depending on the number of module slots added.
+  Bugfixes:
+    - When using a negative number in the added module slots setting, AMS machine locales no longer show "with added module slots"* and similar text.
+      *or the appropriate translation in your language.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.10
 Date: 13/08/2025
   Bugfixes:

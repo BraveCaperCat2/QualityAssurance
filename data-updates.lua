@@ -154,7 +154,7 @@ local QualityTechOrder = Order[QualityTechnologyName]
 local EarlyQualityFilter = Split(config("early-quality-filter"), ",%w*")
 local EarlyQualityLevel = 0
 local EarlyQualityName = nil
-CondLog("EarlyQualityFilter string: " .. config("early-quality-filter") .. " filter: " .. serpent.block(EarlyQualityFilter))
+CondLog("EarlyQualityFilter string: \"" .. config("early-quality-filter") .. "\" filter: " .. serpent.block(EarlyQualityFilter))
 for i,Name in pairs(EarlyQualityFilter) do
     local name = string.lower(Name)
     if Qualities[name] ~= nil and EarlyQualityLevel < Qualities[name].level then
@@ -283,7 +283,7 @@ for _,MachineType in pairs(MachineTypes) do
         for j,Machine in pairs(data.raw[MachineType]) do
             CondLog("Re-scanning Machine \"" .. Machine.name .. "\" now.")
 
-            if string.find(Machine.name, "qa_") then
+            if string.find(Machine.name, "qa_") and string.find(Machine.name, "-ams") then
 
                 -- Update the AMSMachine with certain modifications from the base machine.
                 Machine = NAMSModifications(Machine)
@@ -291,5 +291,236 @@ for _,MachineType in pairs(MachineTypes) do
                 data.raw[MachineType][j] = Machine
             end
         end
+    end
+end
+
+-- Code to generate relabeler recipes. It'll only work once I can make quality-dependent recipes and results and update the code here.
+-- Then I can enable the relabeler setting in settings.lua to make it work.
+if config("relabeler") then
+    -- The relabeler, decreases the quality of an item by 1 tier. Does nothing to normal quality items.
+    CondLog("Creating relabeler recipes.")
+    local function GetLowerQuality(HigherQuality)
+        local LowerQuality
+        local LowestQuality
+        for _,Quality in pairs(data.raw["quality"]) do
+            if not LowestQuality or Quality.level < LowestQuality.level then
+                LowestQuality = Quality
+            end
+            if Quality.next == HigherQuality.name then
+                LowerQuality = Quality
+                break
+            end
+        end
+        if not LowerQuality then
+            LowerQuality = LowestQuality
+        end
+        return LowerQuality
+    end
+    for _,Item in pairs(data.raw["item"]) do
+        if Item.hidden or Item.parameter then
+            goto ItemContinue
+        end
+        for _,Quality in pairs(data.raw["quality"]) do
+            if Quality.hidden or Quality.parameter then
+                goto QualityContinue
+            end
+            local Recipe = {}
+            Recipe.name = Item.name .. "-relabeling-" .. Quality.name
+            Recipe.type = "recipe"
+            Recipe.category = "relabeling"
+            Recipe.subgroup = Item.subgroup
+            Recipe.enabled = true
+            local LowerQuality = GetLowerQuality(Quality)
+            if LowerQuality.next ~= Quality.name then -- If a lower quality could not be found.
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
+                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
+                
+                if Item.localised_name and not Item.localised_name == {} and not Item.localised_name == "" then
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {Item.localised_name}, {Quality.localised_name}}
+                    else
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                    end
+                else
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, {Quality.localised_name}}
+                    else
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                    end
+                end
+            else -- If a lower quality was found.
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
+                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
+                
+                if Item.localised_name and not Item.localised_name == {} and not Item.localised_name == "" then
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"relabeler.relabeling-name", {Item.localised_name}, {Quality.localised_name}}
+                        if LowerQuality.localised_name and not LowerQuality.localised_name == {} and not LowerQuality.localised_name == "" then
+                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {Quality.localised_name}, {LowerQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {Quality.localised_name}, {"quality-name." .. LowerQuality.name}}
+                        end
+                    else
+                        Recipe.localised_name = {"relabeler.relabeling-name", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        if LowerQuality.localised_name and not LowerQuality.localised_name == {} and not LowerQuality.localised_name == "" then
+                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {LowerQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
+                        end
+                    end
+                else
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        if LowerQuality.localised_name and not LowerQuality.localised_name == {} and not LowerQuality.localised_name == "" then
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {LowerQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {"quality-name." .. LowerQuality.name}}
+                        end
+                    else
+                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                        if LowerQuality.localised_name and not LowerQuality.localised_name == {} and not LowerQuality.localised_name == "" then
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {LowerQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
+                        end
+                    end
+                end
+            end
+            data.extend({Recipe})
+            ::QualityContinue::
+        end
+        ::ItemContinue::
+    end
+end
+
+-- Code to generate upcycler recipes. It'll only work once I can make quality-dependent recipes and results and update the code here.
+-- Then I can enable the upcycler setting in settings.lua to make it work.
+if config("upcycler") then
+    -- The upcycler, has a chance to increase the quality of an item by 1 tier, as well as chances to leave the item as-is and turn the item into scrap.
+    CondLog("Creating upcycler recipes.")
+    local function GetHigherQuality(LowerQuality)
+        local HigherQuality
+        local HighestQuality
+        for _,Quality in pairs(data.raw["quality"]) do
+            if not HighestQuality or Quality.level > HighestQuality.level then
+                HighestQuality = Quality
+            end
+            if LowerQuality.next == Quality.name then
+                HigherQuality = Quality
+                break
+            end
+        end
+        if not HigherQuality then
+            HigherQuality = HighestQuality
+        end
+        return HigherQuality
+    end
+    local function QualityLevelToProbability(QualityLevel)
+        local HighestQuality
+        for _,Quality in pairs(data.raw["quality"]) do
+            if not HighestQuality or Quality.level > HighestQuality.level then
+                HighestQuality = Quality
+            end
+        end
+
+        -- Provided by "mmmPI" on the factorio forums. Just not for this specific purpose. Thank you!
+        -- Maps low1 onto low2, high1 onto high2 and values between low1 and high1 onto values between low2 and high2.
+        -- low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+        return 30 + (QualityLevel - 0) * (49 - 30) / (HighestQuality.level - 0)
+
+    end
+    for _,Item in pairs(data.raw["item"]) do
+        if Item.hidden or Item.parameter then
+            goto ItemContinue
+        end
+        for _,Quality in pairs(data.raw["quality"]) do
+            if Quality.hidden or Quality.parameter then
+                goto QualityContinue
+            end
+            local Recipe = {}
+            Recipe.name = Item.name .. "-upcycling-" .. Quality.name
+            Recipe.type = "recipe"
+            Recipe.category = "upcycling"
+            Recipe.subgroup = Item.subgroup
+            Recipe.enabled = true
+            local HigherQuality = GetHigherQuality(Quality)
+            if Quality.next ~= HigherQuality.name then -- If a higher quality could not be found.
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
+                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
+                Recipe.icon = Item.icon
+                Recipe.icon_size = Item.icon_size
+                Recipe.icons = Item.icons
+                
+                if Item.localised_name and not Item.localised_name == {} and not Item.localised_name == "" then
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {Item.localised_name}, {Quality.localised_name}}
+                    else
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                    end
+                else
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, {Quality.localised_name}}
+                    else
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                    end
+                end
+            else -- If a higher quality was found.
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
+                Recipe.results = {
+                    {type = "item", name = Item.name, probability = (50 - QualityLevelToProbability(Quality.level)) / 100, amount = 1}, -- Increase Quality
+                    {type = "item", name = Item.name, probability = 0.5, amount = 1} -- Fail softly
+                    -- Fail hardly (results in nothing)
+                }
+                Recipe.icon = Item.icon
+                Recipe.icon_size = Item.icon_size
+                Recipe.icons = Item.icons
+                
+                if Item.localised_name and not Item.localised_name == {} and not Item.localised_name == "" then
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"upcycler.upcycling-name", {Item.localised_name}, {Quality.localised_name}}
+                        if HigherQuality.localised_name and not HigherQuality.localised_name == {} and not HigherQuality.localised_name == "" then
+                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {Quality.localised_name}, {HigherQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {Quality.localised_name}, {"quality-name." .. HigherQuality.name}}
+                        end
+                    else
+                        Recipe.localised_name = {"upcycler.upcycling-name", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        if HigherQuality.localised_name and not HigherQuality.localised_name == {} and not HigherQuality.localised_name == "" then
+                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {HigherQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
+                        end
+                    end
+                else
+                    if Quality.localised_name and not Quality.localised_name == {} and not Quality.localised_name == "" then
+                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        if HigherQuality.localised_name and not HigherQuality.localised_name == {} and not HigherQuality.localised_name == "" then
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {HigherQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {"quality-name." .. HigherQuality.name}}
+                        end
+                    else
+                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
+                        if HigherQuality.localised_name and not HigherQuality.localised_name == {} and not HigherQuality.localised_name == "" then
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {HigherQuality.localised_name}}
+                        else
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
+                        end
+                    end
+                end
+            end
+            CondLog(serpent.block(Recipe))
+            data.extend({Recipe})
+            ::QualityContinue::
+        end
+        ::ItemContinue::
     end
 end
