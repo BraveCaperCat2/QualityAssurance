@@ -1,3 +1,5 @@
+EnableCraftingSpeedFunction = true
+
 -- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
 local function config(name)
     if settings.startup['qa_' .. name] then
@@ -20,23 +22,45 @@ function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     return math.ceil(math.pow(0.8, ModuleSlotDifference / 2) * 100) / 100
 end
 
-local function Localiser(AMS, Machine)
+local function Localiser(AMS, Machine, removedSlots)
     -- Thank you, A.Freeman (from the mod portal) for providing me with this new localisation system. The function part was my idea though. (If I ever add a supporters list, you'll be on it!)
-    if AMS.type == "technology" then
-        if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
-            AMS.localised_name = {"ams.tech-name", {Machine.localised_name}}
-            AMS.localised_description = {"ams.tech-description", {Machine.localised_name}}
+    if not removedSlots then
+        -- AMS locales.
+        if AMS.type == "technology" then
+            if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
+                AMS.localised_name = {"ams.tech-name", {Machine.localised_name}}
+                AMS.localised_description = {"ams.tech-description", {Machine.localised_name}}
+            else
+                AMS.localised_name = {"ams.tech-name", {"entity-name."..Machine.name}}
+                AMS.localised_description = {"ams.tech-description", {"entity-name."..Machine.name}}
+            end
         else
-            AMS.localised_name = {"ams.tech-name", {"entity-name."..Machine.name}}
-            AMS.localised_description = {"ams.tech-description", {"entity-name."..Machine.name}}
+            if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
+                AMS.localised_name = {"ams.name", {Machine.localised_name}}
+                AMS.localised_description = {"ams.description", {Machine.localised_name}}
+            else
+                AMS.localised_name = {"ams.name", {"entity-name."..Machine.name}}
+                AMS.localised_description = {"ams.description", {"entity-name."..Machine.name}}
+            end
         end
     else
-        if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
-            AMS.localised_name = {"ams.name", {Machine.localised_name}}
-            AMS.localised_description = {"ams.description", {Machine.localised_name}}
+        -- RMS locales.
+        if AMS.type == "technology" then
+            if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
+                AMS.localised_name = {"rms.tech-name", {Machine.localised_name}}
+                AMS.localised_description = {"rms.tech-description", {Machine.localised_name}}
+            else
+                AMS.localised_name = {"rms.tech-name", {"entity-name."..Machine.name}}
+                AMS.localised_description = {"rms.tech-description", {"entity-name."..Machine.name}}
+            end
         else
-            AMS.localised_name = {"ams.name", {"entity-name."..Machine.name}}
-            AMS.localised_description = {"ams.description", {"entity-name."..Machine.name}}
+            if Machine.localised_name and not Machine.localised_name == {} and not Machine.localised_name == "" then
+                AMS.localised_name = {"rms.name", {Machine.localised_name}}
+                AMS.localised_description = {"rms.description", {Machine.localised_name}}
+            else
+                AMS.localised_name = {"rms.name", {"entity-name."..Machine.name}}
+                AMS.localised_description = {"rms.description", {"entity-name."..Machine.name}}
+            end
         end
     end
     return AMS
@@ -759,35 +783,58 @@ for _,MachineType in pairs(MachineTypes) do
                 CondLog("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
-                AMSMachine = Localiser(AMSMachine, Machine)
 
                 if config("ams-base-quality-toggle") then
                     AMSMachine = AddQuality(AMSMachine)
                 end
 
-                local AddedModuleSlots = config("added-module-slots")
-                local SpeedMultiplier = 1
                 if AMSMachine.module_slots == nil then
                     AMSMachine.module_slots = 0
                 end
+
+                local AddedModuleSlots = config("added-module-slots")
+                local SpeedMultiplier = 1
+
+                local RemovingSlots = false
+
                 if EnableCraftingSpeedFunction == true then
-                    if AMSMachine.module_slots + AddedModuleSlots < 0 then
-                        SpeedMultiplier = GetCraftingSpeedMultiplier(AMSMachine.module_slots)
-                        AMSMachine.module_slots = 0
-                    elseif AddedModuleSlots ~= 0 then
-                        SpeedMultiplier = GetCraftingSpeedMultiplier(AddedModuleSlots)
-                        AMSMachine.module_slots = AMSMachine.module_slots + AddedModuleSlots
+                    -- Check for removing more slots than the machine has.
+                    -- This would cause the machine to have negative module slots, which is bad.
+                    -- Instead, remove as many as possible.
+                    if AddedModuleSlots + AMSMachine.module_slots < 0 then
+                        AddedModuleSlots = -AMSMachine.module_slots
                     end
+
+                    if AddedModuleSlots == 0 then
+                        CondLog("Cancelling AMS machine creation, as no module slots would be added or removed.")
+                        goto Continue
+                    end
+
+                    -- Check for removing any slots at all.
+                    -- Removing slots will increase the crafting speed of the machine and change locales.
+                    if AddedModuleSlots < 0 then
+                        CondLog("Machine will have increased speed due to removing modules.")
+                        RemovingSlots = true
+                    end
+
+                    -- Calculate the speed multiplier and add/remove module slots.
+                    SpeedMultiplier = GetCraftingSpeedMultiplier(AddedModuleSlots)
+                    AMSMachine.module_slots = AMSMachine.module_slots + AddedModuleSlots
                 else
                     AddedModuleSlots = 2
                     AMSMachine.module_slots = AMSMachine.module_slots + AddedModuleSlots
                     SpeedMultiplier = 0.8
                 end
+
+                -- Decrease/increase crafting speed.
                 if AMSMachine.crafting_speed then
                     AMSMachine.crafting_speed = AMSMachine.crafting_speed * SpeedMultiplier
                 elseif AMSMachine.mining_speed then
                     AMSMachine.mining_speed = AMSMachine.mining_speed * SpeedMultiplier
                 end
+
+                AMSMachine = Localiser(AMSMachine, Machine, RemovingSlots)
+
                 AMSMachine["minable"] = AMSMachine["minable"] or {mining_time = 1}
                 AMSMachine.minable.results = nil
                 AMSMachine.minable.result = AMSMachine.name
@@ -819,7 +866,7 @@ for _,MachineType in pairs(MachineTypes) do
                 end
                 AMSMachineItem.name = AMSMachine.name
                 AMSMachineItem.type = "item"
-                AMSMachineItem = Localiser(AMSMachineItem, Machine)
+                AMSMachineItem = Localiser(AMSMachineItem, Machine, RemovingSlots)
                 AMSMachineItem.stack_size = 50
                 AMSMachineItem.place_result = AMSMachine.name
                 AMSMachine.MachineItem = AMSMachineItem.name
@@ -827,7 +874,7 @@ for _,MachineType in pairs(MachineTypes) do
                 local AMSMachineRecipe = {}
                 AMSMachineRecipe.name = AMSMachineItem.name
                 AMSMachineRecipe.type = "recipe"
-                AMSMachineRecipe = Localiser(AMSMachineRecipe, Machine)
+                AMSMachineRecipe = Localiser(AMSMachineRecipe, Machine, RemovingSlots)
                 if Machine.MachineItem == nil and Machine.minable then
                     if Machine.minable.result and Machine.minable.result ~= "" then
                         AMSMachineRecipe.ingredients = {{type = "item", name = Machine.minable.result, amount = 1}, {type = "item", name = "steel-plate", amount = 10}, {type = "item", name = "copper-cable", amount = 20}}
@@ -890,12 +937,13 @@ for _,MachineType in pairs(MachineTypes) do
                     AMSMachineTechnology.unit = nil
                 end
                 AMSMachineTechnology.effects = {{type = "unlock-recipe", recipe = AMSMachineRecipe.name}}
-                AMSMachineTechnology = Localiser(AMSMachineTechnology, Machine)
+                AMSMachineTechnology = Localiser(AMSMachineTechnology, Machine, RemovingSlots)
 
                 CondLog("Made AMS version of \"" .. Machine.name .. "\".")
                 data:extend{AMSMachine, AMSMachineItem, AMSMachineRecipe, AMSMachineTechnology}
 
                 RecyclingLibrary.generate_recycling_recipe(AMSMachineRecipe)
+                ::Continue::
             else
                 CondLog("Machine \"" .. Machine.name .. "\" is an AMS machine, AMS machines are turrend off, or this machine is banned. Skipping the AMS machine making process.")
             end

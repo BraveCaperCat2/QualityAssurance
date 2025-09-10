@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.2
+Date: 10/09/2025
+  Changes:
+    - Various internal code changes.
+    - AMS/RMS machines are no longer made when no module slots are added/removed.
+    - Add a warning to the added module slots setting description about changing the value in an existing game.
+  Bugfixes:
+    - When using a negative number in the added module slots setting, AMS machine locales no longer show "with added module slots"* and similar text.
+      *or the appropriate translation in your language.
+    - Fixed an issue in the changelog where an issue was listed as fixed in version 1.4.0 but wasn't actually fixed in that version.
+      That issue is fixed as of version 1.4.2.
+    - Fixed an issue where changing the amount of added module slots in AMS machines would not do anything.
+---------------------------------------------------------------------------------------------------
 Version: 1.4.1
 Date: 08/09/2025
   Changes:
@@ -18,9 +31,6 @@ Date: 19/08/2025
       It only requires unhiding and unlocking the settings for them and implementing a fix for the crashes which will happen if you try to enable them yourself.
     - Unstopped working on the previously mentioned new machines, at least temporarily.
     - Replaced the code that decided how much faster or slower AMS machines are compared to their non-AMS conterparts depending on the number of module slots added.
-  Bugfixes:
-    - When using a negative number in the added module slots setting, AMS machine locales no longer show "with added module slots"* and similar text.
-      *or the appropriate translation in your language.
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.10
 Date: 13/08/2025
