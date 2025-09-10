@@ -343,13 +343,14 @@ for PrerequisiteName,Prerequisite in pairs(TechnologiesToBeRemoved) do
     data.raw["technology"][PrerequisiteName] = nil
 end
 
+--[[ -- No longer needed as of 1.4.1. Try returning this code if something breaks.
 local function NAMSModifications(Machine)
     local NAMSMachine = data.raw[Machine.type][Machine.NAMSMachine]
     Machine.category = NAMSMachine.category
     return Machine
 end
 
-local MachineTypes = {"crafting-machine", "furnace", "mining-drill", "rocket-silo"}
+local MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
 
 CondLog("Initiating more operations on automated crafting.")
 for _,MachineType in pairs(MachineTypes) do
@@ -367,6 +368,7 @@ for _,MachineType in pairs(MachineTypes) do
         end
     end
 end
+]]
 
 -- Code to generate relabeler recipes. It'll only work once I can make quality-dependent recipes and results and update the code here.
 -- Then I can enable the relabeler setting in settings.lua to make it work.
@@ -831,6 +833,8 @@ for _,MachineType in pairs(MachineTypes) do
                     AMSMachine.crafting_speed = AMSMachine.crafting_speed * SpeedMultiplier
                 elseif AMSMachine.mining_speed then
                     AMSMachine.mining_speed = AMSMachine.mining_speed * SpeedMultiplier
+                elseif AMSMachine.researching_speed then
+                    AMSMachine.researching_speed = AMSMachine.researching_speed * SpeedMultiplier
                 end
 
                 AMSMachine = Localiser(AMSMachine, Machine, RemovingSlots)
