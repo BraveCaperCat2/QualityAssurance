@@ -1,12 +1,7 @@
-EnableCraftingSpeedFunction = true
+-- Provides config, CondLog functions
+require("utils")
 
--- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
-local function config(name)
-    if settings.startup['qa_' .. name] then
-        return settings.startup['qa_' .. name].value
-    end
-    return nil
-end
+EnableCraftingSpeedFunction = true
 
 -- A list of entity names to be skipped over when creating AMS machines.
 local AMSBlocklist = {"awesome-sink-gui", "oil_rig_migration", "elevated-pipe", "yir_factory_stuff", "yir_diesel_monument", "yir_future_monument", "energy-void", "passive-energy-void", "fluid-source"}
@@ -107,13 +102,6 @@ function Split(str, delim, maxNb)
         result[nb + 1] = string.sub(str, lastPos)
     end
     return result
-end
-
-local EnableLog = config("dev-mode")
-function CondLog(str)
-    if EnableLog then
-        log(str)
-    end
 end
 
 function ListToString(List)
@@ -904,6 +892,8 @@ for _,MachineType in pairs(MachineTypes) do
                 
                 local AMSMachineTechnology = table.deepcopy(data.raw["technology"]["automation-2"])
                 AMSMachineTechnology.name = AMSMachine.name
+                -- Enable when prerequisites are fulfiled 
+                AMSMachineTechnology.enabled = false
                 -- Thank you, A.Freeman (from the mod portal) for providing me this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
                 local Prerequisite = GetMachineTechnology(Machine)
                 if Prerequisite then
