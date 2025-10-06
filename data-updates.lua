@@ -892,8 +892,6 @@ for _,MachineType in pairs(MachineTypes) do
                 
                 local AMSMachineTechnology = table.deepcopy(data.raw["technology"]["automation-2"])
                 AMSMachineTechnology.name = AMSMachine.name
-                -- Enable when prerequisites are fulfiled 
-                AMSMachineTechnology.enabled = false
                 -- Thank you, A.Freeman (from the mod portal) for providing me this new prerequisites system. (If I ever add a supporters list, you'll be on it!)
                 local Prerequisite = GetMachineTechnology(Machine)
                 if Prerequisite then

@@ -55,6 +55,13 @@ data:extend{
         default_value = true,
         order = "ca"
     },
+    -- Hide technologies that unlock AMS machines until all prerequisites are researched
+    {   name = "qa_hide-ams-technologies",
+        type = "bool-setting",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "caa"
+    },
     -- How many module slotes are added in AMS machines
     --  option with order cb
     -- Enable AMS machines for specific types
