@@ -1,17 +1,5 @@
--- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
-local function config(name)
-    if settings.startup['qa_' .. name] then
-        return settings.startup['qa_' .. name].value
-    end
-    return nil
-end
-
-local EnableLog = config("dev-mode")
-function CondLog(str)
-    if EnableLog then
-        log(str)
-    end
-end
+-- Provides config, CondLog functions
+require("utils")
 
 -- Will not work until I can make recipe ingredients and results depend on quality.
 -- Otherwise, there will be duplicate recipes with the same ingredients, which will cause a crash due to the furnace-like nature of the relabeler.

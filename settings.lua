@@ -3,12 +3,8 @@ local EnableRelabelerAndUpcycler = false -- Causes a crash if enabled, because t
 MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
 
 data:extend{
-    {   name = "qa_base-quality",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        order = "a"
-    },
+    -- Quality unlocks section
+    -- When to unlock quality
     {   name = "qa_quality-unlock",
         type = "string-setting",
         setting_type = "startup",
@@ -21,63 +17,100 @@ data:extend{
             "quality-module-2",
             "quality-module-3"
         },
-        order = "b"
+        order = "aa"
     },
-    {   name = "qa_moduleless-quality",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        order = "c"
-    },
-    {   name = "qa_base-quality-value",
-        type = "double-setting",
-        setting_type = "startup",
-        default_value = 10,
-        order = "d",
-        minimum_value = 1,
-        maximum_value = 32766
-    },
-    {   name = "qa_quality-beacons",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = true,
-        order = "e"
-    },
-    {   name = "qa_quality-module-multiplier",
-        type = "double-setting",
-        setting_type = "startup",
-        default_value = 1,
-        order = "f",
-        minimum_value = 0.01,
-        maximum_value = 500
-    },
-    {   name = "qa_ams-machines-toggle",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = true,
-        order = "g"
-    },
-    {   name = "qa_dev-mode",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        order = "i"
-    },
-    {   name = "qa_ams-base-quality-toggle",
-        type = "bool-setting",
-        setting_type = "startup",
-        default_value = false,
-        order = "j"
-    },
+    -- Which qualities will be unlocked
     {
         name = "qa_early-quality-filter",
         type = "string-setting",
         setting_type = "startup",
         default_value = "",
-        order = "o",
+        order = "ab",
         allow_blank = true
-    }
+    },
+
+    -- Quality modules section
+    -- Multiplier for quality module's effeciency
+    {   name = "qa_quality-module-multiplier",
+        type = "double-setting",
+        setting_type = "startup",
+        default_value = 1,
+        order = "ba",
+        minimum_value = 0.01,
+        maximum_value = 500
+    },
+    -- Allow quality options in beacons
+    {   name = "qa_quality-beacons",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = true,
+        order = "bb"
+    },
+
+    -- Machines with Additional Module Slots (AMS) section
+    -- Enable AMS machines
+    {   name = "qa_ams-machines-toggle",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = true,
+        order = "ca"
+    },
+    -- Hide technologies that unlock AMS machines until all prerequisites are researched
+    {   name = "qa_hide-ams-technologies",
+        type = "bool-setting",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "caa"
+    },
+    -- How many module slotes are added in AMS machines
+    --  option with order cb
+    -- Enable AMS machines for specific types
+    --  options with orders cc*
+
+    -- Base quality section
+    -- Enable base quality
+    {   name = "qa_base-quality",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "da"
+    },
+    -- Base quality value
+    {   name = "qa_base-quality-value",
+        type = "double-setting",
+        setting_type = "startup",
+        default_value = 10,
+        order = "db",
+        minimum_value = 1,
+        maximum_value = 32766
+    },
+    -- Add base quality to machines without module slots
+    {   name = "qa_moduleless-quality",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "dc"
+    },
+    -- Base quality will affect only AMS machines
+    {   name = "qa_ams-base-quality-toggle",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "dd"
+    },
+    -- Which types of machines will be affected
+    --  options with orders de*
+
+    -- Debug option section
+    -- Enable debug logging
+    {   name = "qa_dev-mode",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+        order = "z"
+    },
 }
+
 if EnableCraftingSpeedFunction then
     data:extend{
     {   name = "qa_added-module-slots",
@@ -86,7 +119,7 @@ if EnableCraftingSpeedFunction then
         default_value = 2,
         minimum_value = -10,
         maximum_value = 10,
-        order = "h"
+        order = "cb"
 
     }
 }
@@ -97,11 +130,33 @@ else
         setting_type = "startup",
         default_value = 2,
         allowed_values = {2},
-        order = "h",
+        order = "cb",
         hidden = true
     }
 }
 end
+
+for _,MachineType in pairs(MachineTypes) do
+    data:extend{
+        -- Enable AMS machines for specific machine types
+        {
+            name = "qa_enable-ams-" .. MachineType,
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "cc[" .. MachineType .. "]"
+        },
+        -- Which types of machines will be affected by base quality
+        {
+            name = "qa_enable-base-quality-" .. MachineType,
+            type = "bool-setting",
+            setting_type = "startup",
+            default_value = true,
+            order = "de[" .. MachineType .. "]"
+        }
+    }
+end
+
 
 if EnableRelabelerAndUpcycler then
     data:extend{
@@ -135,25 +190,6 @@ else
             forced_value = false,
             order = "l",
             hidden = true
-        }
-    }
-end
-
-for _,MachineType in pairs(MachineTypes) do
-    data:extend{
-        {
-            name = "qa_enable-ams-" .. MachineType,
-            type = "bool-setting",
-            setting_type = "startup",
-            default_value = true,
-            order = "m[" .. MachineType .. "]"
-        },
-        {
-            name = "qa_enable-base-quality-" .. MachineType,
-            type = "bool-setting",
-            setting_type = "startup",
-            default_value = true,
-            order = "n[" .. MachineType .. "]"
         }
     }
 end

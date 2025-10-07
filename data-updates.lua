@@ -1,12 +1,7 @@
-EnableCraftingSpeedFunction = true
+-- Provides config, CondLog functions
+require("utils")
 
--- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
-local function config(name)
-    if settings.startup['qa_' .. name] then
-        return settings.startup['qa_' .. name].value
-    end
-    return nil
-end
+EnableCraftingSpeedFunction = true
 
 -- A list of entity names to be skipped over when creating AMS machines.
 local AMSBlocklist = {"awesome-sink-gui", "oil_rig_migration", "elevated-pipe", "yir_factory_stuff", "yir_diesel_monument", "yir_future_monument", "energy-void", "passive-energy-void", "fluid-source"}
@@ -107,13 +102,6 @@ function Split(str, delim, maxNb)
         result[nb + 1] = string.sub(str, lastPos)
     end
     return result
-end
-
-local EnableLog = config("dev-mode")
-function CondLog(str)
-    if EnableLog then
-        log(str)
-    end
 end
 
 function ListToString(List)
