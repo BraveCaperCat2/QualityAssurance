@@ -13,6 +13,23 @@ local function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     return math.ceil(math.pow(0.8, ModuleSlotDifference / 2) * 100) / 100
 end
 
+local function UpdateIcon(Entity)
+    if Entity.icons then
+        Entity.icons[#Entity.icons+1] = {
+            icon = "__QualityAssurance__/graphics/icons/qa256.png",
+            icon_size=256
+        }
+        
+    elseif Entity.icon then
+        Entity.icons = {
+            {icon = Entity.icon, icon_size = Entity.icon_size},
+            {icon = "__QualityAssurance__/graphics/icons/qa256.png", icon_size=256},
+        }
+        Entity.icon = nil
+    end
+    return Entity
+end
+
 -- Build localised name and description for AMS entity
 -- Thank you, A.Freeman (from the mod portal) for providing me with this new localisation system. 
 -- The function part was my idea though. (If I ever add a supporters list, you'll be on it!)
@@ -57,6 +74,7 @@ local function Localiser(AMS, Machine, AMSMachine)
             end
         end
     end
+    UpdateIcon(AMS)
     return AMS
 end
 

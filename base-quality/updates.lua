@@ -1,5 +1,5 @@
 -- Provides MachineTypes, UnfixedRSRBlocklist, BaseQualityBlockList
-require("common.consts")
+require("common.values")
 -- Provides Config, CondLog functions
 require("common.utils")
 -- Provides EnableQuality
