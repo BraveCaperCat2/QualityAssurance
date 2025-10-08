@@ -43,7 +43,7 @@ end
 
 -- Add Base Quality
 CondLog("Adding base quality modules.")
-for _,MachineType in pairs(MachineTypes) do
+for _,MachineType in pairs(BQMachineTypes) do
     if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
 

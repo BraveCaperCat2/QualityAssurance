@@ -13,6 +13,7 @@ local function GetCraftingSpeedMultiplier(ModuleSlotDifference)
     return math.ceil(math.pow(0.8, ModuleSlotDifference / 2) * 100) / 100
 end
 
+-- Add QA image to icons
 local function UpdateIcon(Entity)
     if Entity.icons then
         Entity.icons[#Entity.icons+1] = {
@@ -30,7 +31,7 @@ local function UpdateIcon(Entity)
     return Entity
 end
 
--- Build localised name and description for AMS entity
+-- Build localised name and description for AMS entity, add QA image to icons
 -- Thank you, A.Freeman (from the mod portal) for providing me with this new localisation system. 
 -- The function part was my idea though. (If I ever add a supporters list, you'll be on it!)
 local function Localiser(AMS, Machine, AMSMachine)
@@ -301,7 +302,7 @@ local NewRecipies = {}
 
 -- Create AMS version of selected machines.
 CondLog("Creating AMS machines")
-for _,MachineType in pairs(MachineTypes) do
+for _,MachineType in pairs(AMSMachineTypes) do
     if not data.raw[MachineType] then
         CondLog("Skipping empty machine type " .. MachineType)
         goto continue_MachineType

@@ -4,7 +4,9 @@ VariableAdditionalSlots = true
 EnableRelabelerAndUpcycler = false
 
 -- List of machine types eligible for additional module slots.
-MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo", "lab"}
+AMSMachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo", "lab"}
+-- List of machine types eligible for base quality.
+BQMachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
 
 -- A list of entity names to be skipped over when creating AMS machines.
 AMSBlocklist = {"awesome-sink-gui", "oil_rig_migration", "elevated-pipe", "yir_factory_stuff", "yir_diesel_monument", "yir_future_monument", "energy-void", "passive-energy-void", "fluid-source"}

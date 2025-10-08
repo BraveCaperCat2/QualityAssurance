@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.0
+Date: 08/10/2025
+  Features:
+    - AMS machine technologies will be hidden until their prerequisites are fulfilled.
+    - Added map setting to show/hide all AMS technologies.
+    - Added additional QA icon to AMS entities.
+    - Now you can make AMS Labs
+  Changes:
+    - Group settings by things they affect. 
+    - Update a few option descriptions (en, ru). 
+    - Add missing translations for ru.
+    - Reworked mod structure
+---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 10/09/2025
   Changes:

@@ -135,7 +135,7 @@ else
 }
 end
 
-for _,MachineType in pairs(MachineTypes) do
+for _,MachineType in pairs(AMSMachineTypes) do
     data:extend{
         -- Enable AMS machines for specific machine types
         {
@@ -145,6 +145,10 @@ for _,MachineType in pairs(MachineTypes) do
             default_value = true,
             order = "cc[" .. MachineType .. "]"
         },
+    }
+end
+for _,MachineType in pairs(BQMachineTypes) do
+    data:extend{
         -- Which types of machines will be affected by base quality
         {
             name = "qa_enable-base-quality-" .. MachineType,
