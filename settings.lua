@@ -1,6 +1,5 @@
-local EnableCraftingSpeedFunction = true
-local EnableRelabelerAndUpcycler = false -- Causes a crash if enabled, because the relabeler and upcycler are not functional yet.
-MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
+-- Provides MachineTypes, VariableAdditionalSlots, EnableRelabelerAndUpcycler
+require("common.values")
 
 data:extend{
     -- Quality unlocks section
@@ -111,7 +110,7 @@ data:extend{
     },
 }
 
-if EnableCraftingSpeedFunction then
+if VariableAdditionalSlots then
     data:extend{
     {   name = "qa_added-module-slots",
         type = "int-setting",
@@ -136,7 +135,7 @@ else
 }
 end
 
-for _,MachineType in pairs(MachineTypes) do
+for _,MachineType in pairs(AMSMachineTypes) do
     data:extend{
         -- Enable AMS machines for specific machine types
         {
@@ -146,6 +145,10 @@ for _,MachineType in pairs(MachineTypes) do
             default_value = true,
             order = "cc[" .. MachineType .. "]"
         },
+    }
+end
+for _,MachineType in pairs(BQMachineTypes) do
+    data:extend{
         -- Which types of machines will be affected by base quality
         {
             name = "qa_enable-base-quality-" .. MachineType,
