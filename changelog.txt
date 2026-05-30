@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.6
+Date: 30/05/2026
+  Changes:
+    - Various internal code changes.
+    - Implemented better error handling (that is, any error handling at all) for prerequisite-type errors
+---------------------------------------------------------------------------------------------------
 Version: 1.4.5
 Date: 24/01/2026
   Changes:
