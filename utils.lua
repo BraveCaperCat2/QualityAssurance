@@ -36,5 +36,5 @@ end
 
 -- Checks if a localised string is nil or empty.
 function Empty(f)
-    return f == nil or not next(f) or f == ""
+    return f == nil or f == "" or (type(f) == "table" and not next(f))
 end
