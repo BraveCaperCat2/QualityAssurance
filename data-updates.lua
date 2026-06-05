@@ -38,7 +38,7 @@ local function Localiser(AMS, Machine, removedSlots)
 
     -- Localised name vs no localised name distinction
     if not Empty(Machine.localised_name) then
-        table.insert(LocalisationParameter, Machine.localised_name)
+        LocalisationParameter = Machine.localised_name
     else
         table.insert(LocalisationParameter, "entity-name."..Machine.name)
     end
@@ -391,16 +391,16 @@ if dataConfig("relabeler") then
                 
                 if not Empty(Item.localised_name) then
                     if not Empty(Quality.localised_name)then
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {Item.localised_name}, {Quality.localised_name}}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", Item.localised_name, Quality.localised_name}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", Item.localised_name, Quality.localised_name}
                     else
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {Item.localised_name}, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", Item.localised_name, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", Item.localised_name, {"quality-name." .. Quality.name}}
                     end
                 else
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, {Quality.localised_name}}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, Quality.localised_name}
+                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, Quality.localised_name}
                     else
                         Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
                         Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
@@ -412,32 +412,32 @@ if dataConfig("relabeler") then
                 
                 if not Empty(Item.localised_name) then
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name", Item.localised_name, Quality.localised_name}
                         if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {Quality.localised_name}, {LowerQuality.localised_name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, Quality.localised_name, LowerQuality.localised_name}
                         else
-                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {Quality.localised_name}, {"quality-name." .. LowerQuality.name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, Quality.localised_name, {"quality-name." .. LowerQuality.name}}
                         end
                     else
-                        Recipe.localised_name = {"relabeler.relabeling-name", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name", Item.localised_name, {"quality-name." .. Quality.name}}
                         if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {LowerQuality.localised_name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, {"quality-name." .. Quality.name}, LowerQuality.localised_name}
                         else
-                            Recipe.localised_description = {"relabeler.relabeling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
                         end
                     end
                 else
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, Quality.localised_name}
                         if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {LowerQuality.localised_name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, Quality.localised_name, LowerQuality.localised_name}
                         else
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {"quality-name." .. LowerQuality.name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, Quality.localised_name, {"quality-name." .. LowerQuality.name}}
                         end
                     else
                         Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
                         if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {LowerQuality.localised_name}}
+                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, LowerQuality.localised_name}
                         else
                             Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
                         end
@@ -511,16 +511,16 @@ if dataConfig("upcycler") then
                 
                 if not Empty(Item.localised_name) then
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {Item.localised_name}, {Quality.localised_name}}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", Item.localised_name, Quality.localised_name}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", Item.localised_name, Quality.localised_name}
                     else
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {Item.localised_name}, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", Item.localised_name, {"quality-name." .. Quality.name}}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", Item.localised_name, {"quality-name." .. Quality.name}}
                     end
                 else
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, {Quality.localised_name}}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, Quality.localised_name}
+                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, Quality.localised_name}
                     else
                         Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
                         Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
@@ -539,32 +539,32 @@ if dataConfig("upcycler") then
                 
                 if not Empty(Item.localised_name) then
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name", {Item.localised_name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name", Item.localised_name, Quality.localised_name}
                         if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {Quality.localised_name}, {HigherQuality.localised_name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, Quality.localised_name, HigherQuality.localised_name}
                         else
-                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {Quality.localised_name}, {"quality-name." .. HigherQuality.name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, Quality.localised_name, {"quality-name." .. HigherQuality.name}}
                         end
                     else
-                        Recipe.localised_name = {"upcycler.upcycling-name", {Item.localised_name}, {"quality-name." .. Quality.name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name", Item.localised_name, {"quality-name." .. Quality.name}}
                         if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {HigherQuality.localised_name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, {"quality-name." .. Quality.name}, HigherQuality.localised_name}
                         else
-                            Recipe.localised_description = {"upcycler.upcycling-description", {Item.localised_name}, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
                         end
                     end
                 else
                     if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, {Quality.localised_name}}
+                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, Quality.localised_name}
                         if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {HigherQuality.localised_name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, Quality.localised_name, HigherQuality.localised_name}
                         else
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {Quality.localised_name}, {"quality-name." .. HigherQuality.name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, Quality.localised_name, {"quality-name." .. HigherQuality.name}}
                         end
                     else
                         Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
                         if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {HigherQuality.localised_name}}
+                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, HigherQuality.localised_name}
                         else
                             Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
                         end
