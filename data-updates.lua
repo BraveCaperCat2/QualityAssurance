@@ -579,62 +579,40 @@ if dataConfig("upcycler") then
     end
 end
 
+-- Add base quality for a machine
 local function AddQuality(Machine)
-    -- Increase quality for a machine.
     if not dataConfig("base-quality") then
         CondLog("Base Quality setting is disabled. Skipping.")
         return Machine
     end
 
     if not dataConfig("moduleless-quality") then
-        if Machine.module_slots == nil then
+        if Machine.module_slots == nil or Machine.module_slots == 0 then
             CondLog("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
-            return Machine
-        else
-            if Machine.module_slots == 0 then
-                CondLog("Moduleless Quality setting is disabled, and this machine doesn't have module slots. Skipping.")
-                return Machine
-            end
+            return
         end
     end
     local BaseQuality = false
     NormalProbability = data.raw.quality["normal"].next_probability or 1
-    while not BaseQuality do
-        if Machine.effect_receiver then
-            if Machine.effect_receiver.base_effect then
-                if Machine.effect_receiver.base_effect.quality then
-                    if Machine.effect_receiver.base_effect.quality == 0 then
-                        CondLog("Machine does not contain base quality. Adding base quality.")
-                        Machine.effect_receiver.base_effect.quality = dataConfig("base-quality-value") / 100 / NormalProbability
-                    else
-                        CondLog("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
-                    end
-                    BaseQuality = true
-                else
-                    CondLog("Machine does not contain base quality. Preparing to add base quality.")
-                    Machine.effect_receiver.base_effect.quality = 0
-                end
-            else
-                Machine.effect_receiver.base_effect = {}
-            end
-            if Machine.effect_receiver.uses_beacon_effects ~= true then
-                Machine.effect_receiver.uses_beacon_effects = true
-            end
-            if Machine.effect_receiver.uses_module_effects ~= true then
-                Machine.effect_receiver.uses_module_effects = true
-            end
-            if Machine.effect_receiver.uses_surface_effects ~= true then
-                Machine.effect_receiver.uses_surface_effects = true
-            end
-        else
-            Machine.effect_receiver = {}
-        end
+
+    Machine.effect_receiver = Machine.effect_receiver or {}
+    Machine.effect_receiver.base_effect = Machine.effect_receiver.base_effect or {}
+    Machine.effect_receiver.base_effect.quality = Machine.effect_receiver.base_effect.quality or 0
+    if Machine.effect_receiver.base_effect.quality == 0 then
+        CondLog("Machine does not contain base quality. Adding base quality.")
+        Machine.effect_receiver.base_effect.quality = dataConfig("base-quality-value") / 100 / NormalProbability
+    else
+        CondLog("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
     end
+
+    -- Enable beacon/module/surface effects
+    Machine.effect_receiver.uses_beacon_effects = true
+    Machine.effect_receiver.uses_module_effects = true
+    Machine.effect_receiver.uses_surface_effects = true
 end
 
+-- Enables quality effects for a machine from any source
 local function EnableQuality(Machine)
-    -- Allow Qualities in all Machines.
-
     if Machine.allowed_effects then
         if type(Machine.allowed_effects) == "string" then
             Machine.allowed_effects = {Machine.allowed_effects}
@@ -747,7 +725,7 @@ for _,MachineType in pairs(MachineTypes) do
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
 
                 if dataConfig("ams-base-quality-toggle") then
-                    AMSMachine = AddQuality(AMSMachine)
+                    AddQuality(AMSMachine)
                 end
 
                 if AMSMachine.module_slots == nil then
@@ -915,8 +893,8 @@ for _,MachineType in pairs(MachineTypes) do
 
                 RecyclingLibrary.generate_recycling_recipe(AMSMachineRecipe)
                 ::Continue::
-            else
-                CondLog("Machine \"" .. Machine.name .. "\" is an AMS machine, AMS machines are turrend off, or this machine is banned. Skipping the AMS machine making process.")
+            elseif (not string.find(Machine.name, "qa_")) then
+                CondLog("Skipping AMS for machine \"" .. Machine.name .. "\" because AMS machines are turned off, or this machine is banned.")
             end
         end
     end
@@ -925,7 +903,7 @@ end
 -- Allow Quality Modules in Beacons.
 if dataConfig("quality-beacons") then
     for _,Beacon in pairs(data.raw["beacon"]) do
-        Beacon = EnableQuality(Beacon)
+        EnableQuality(Beacon)
     end
 end
 
