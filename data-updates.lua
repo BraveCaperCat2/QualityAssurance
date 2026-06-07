@@ -630,50 +630,31 @@ local function AddQuality(Machine)
             Machine.effect_receiver = {}
         end
     end
-    return Machine
 end
 
 local function EnableQuality(Machine)
     -- Allow Qualities in all Machines.
-    local qualityadded = false
-    local hasquality = false
-    while not hasquality do
-        if Machine.allowed_effects then
-            if type(Machine.allowed_effects) ~= "string" then
-                for _, AllowedEffect in pairs(Machine.allowed_effects) do
-                    if AllowedEffect == "quality" then
-                        hasquality = true
-                    end
-                end
-                if hasquality == false then
-                    table.insert(Machine.allowed_effects, "quality")
-                    hasquality = true
-                end
-            else
-                Machine.allowed_effects = {Machine.allowed_effects}
-            end
-        else
-            hasquality = true
-        end
-    end
 
-    while not qualityadded do
-        if Machine.effect_receiver then
-            if Machine.effect_receiver.uses_beacon_effects ~= true then
-                Machine.effect_receiver.uses_beacon_effects = true
+    if Machine.allowed_effects then
+        if type(Machine.allowed_effects) == "string" then
+            Machine.allowed_effects = {Machine.allowed_effects}
+        end
+        local hasquality = false
+        for _, AllowedEffect in pairs(Machine.allowed_effects) do
+            if AllowedEffect == "quality" then
+                hasquality = true
             end
-            if Machine.effect_receiver.uses_module_effects ~= true then
-                Machine.effect_receiver.uses_module_effects = true
-            end
-            if Machine.effect_receiver.uses_surface_effects ~= true then
-                Machine.effect_receiver.uses_surface_effects = true
-            end
-            qualityadded = true
-        else
-            Machine.effect_receiver = {}
+        end
+        if hasquality == false then
+            table.insert(Machine.allowed_effects, "quality")
         end
     end
-    return Machine
+    
+    -- Enable beacon/module/surface effects
+    Machine.effect_receiver = Machine.effect_receiver or {}
+    Machine.effect_receiver.uses_beacon_effects = true
+    Machine.effect_receiver.uses_module_effects = true
+    Machine.effect_receiver.uses_surface_effects = true
 end
 
 local RecyclingLibrary = require("__quality__.prototypes.recycling")
@@ -685,6 +666,9 @@ CondLog("Performing operations on Automated Crafting.")
 for _,MachineType in pairs(MachineTypes) do
     if data.raw[MachineType] then
         for j,Machine in pairs(data.raw[MachineType]) do
+            if Machine == nil then
+                error("Invalid prototype \"nil\" in data.raw[" .. MachineType .. "]. This is NOT an issue with QA!")
+            end
 
             local AMSBanned = false
             local UnfixedRSRBanned = false
@@ -748,15 +732,13 @@ for _,MachineType in pairs(MachineTypes) do
             
             if MachineType ~= "rocket-silo" then
                 if (not dataConfig("ams-base-quality-toggle")) and dataConfig("enable-base-quality-" .. MachineType) and (not BaseQualityBanned) then
-                    Machine = AddQuality(Machine)
+                    AddQuality(Machine)
                 end
-                Machine = EnableQuality(Machine)
+                EnableQuality(Machine)
             elseif not UnfixedRSRBanned then
                 data.raw[MachineType][j].fixed_recipe = nil
                 data.raw[MachineType][j].fixed_quality = nil
             end
-
-            data.raw[MachineType][j] = Machine
 
             -- Create a new version of all machines which don't have additional module slots.
             if ( not string.find(Machine.name, "qa_") ) and dataConfig("ams-machines-toggle") and ( not AMSBanned ) and (dataConfig("enable-ams-" .. MachineType)) then
