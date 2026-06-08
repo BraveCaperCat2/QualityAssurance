@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.9
+Date: 08/06/2026
+  Bugfixes:
+    - Fix a crash that occurs when running the Nonstandard Beacons mod. (and another mod that uses it)
+  Changes:
+    - Various internal code changes.
+---------------------------------------------------------------------------------------------------
 Version: 1.4.8
 Date: 05/06/2026
   Bugfixes:
