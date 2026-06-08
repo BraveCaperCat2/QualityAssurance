@@ -594,14 +594,9 @@ local function AddQuality(Machine)
     else
         CondLog("Machine contains base quality of amount " .. Machine.effect_receiver.base_effect.quality or 0 ..". Skipping.")
     end
-
-    -- Enable beacon/module/surface effects
-    Machine.effect_receiver.uses_beacon_effects = true
-    Machine.effect_receiver.uses_module_effects = true
-    Machine.effect_receiver.uses_surface_effects = true
 end
 
--- Enables quality effects for a machine from any source
+-- Enables quality effects for a machine
 local function EnableQuality(Machine)
     if Machine.allowed_effects then
         if type(Machine.allowed_effects) == "string" then
@@ -618,6 +613,11 @@ local function EnableQuality(Machine)
         end
     end
     
+end
+
+-- Enables all effect sources for a machine
+-- Do NOT call this function on beacon prototypes
+local function EnableEffectSources(Machine)
     -- Enable beacon/module/surface effects
     Machine.effect_receiver = Machine.effect_receiver or {}
     Machine.effect_receiver.uses_beacon_effects = true
@@ -703,6 +703,7 @@ for _,MachineType in pairs(MachineTypes) do
                     AddQuality(Machine)
                 end
                 EnableQuality(Machine)
+                EnableEffectSources(Machine)
             elseif not UnfixedRSRBanned then
                 data.raw[MachineType][j].fixed_recipe = nil
                 data.raw[MachineType][j].fixed_quality = nil

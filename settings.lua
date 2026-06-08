@@ -48,9 +48,7 @@ data:extend{
         name = "qa_quality-beacons",
         type = "bool-setting",
         setting_type = "startup",
-        default_value = (mods["zzz-nonstandard-beacons"] == nil),
-        forced_value = (mods["zzz-nonstandard-beacons"] == nil),
-        hidden = (mods["zzz-nonstandard-beacons"] ~= nil),
+        default_value = true,
         order = "bb"
     },
 
@@ -230,9 +228,4 @@ else
             hidden = true
         }
     }
-end
-
-if (mods["zzz-nonstandard-beacons"]) then
-    CondLog("Setting \"quality-beacons\" disabled because \"zzz-nonstandard-beacons\" is installed.")
-    CondLog("If you want to re-enable \"quality-beacons\", you'll have to disable \"zzz-nonstandard-beacons\".")
 end
