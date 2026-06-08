@@ -142,6 +142,7 @@ for i,Technology in pairs(Technologies) do
             if Prerequisites[Prerequisite] == nil then
                 error("Cannot find prerequisite " .. Prerequisite .. " of technology " .. Technology.name .. ". This is NOT an issue with QA!")
             end
+
             table.insert(Prerequisites[Prerequisite], Technology.name)
         end
     end
@@ -385,64 +386,53 @@ if dataConfig("relabeler") then
             Recipe.subgroup = Item.subgroup
             Recipe.enabled = true
             local LowerQuality = GetLowerQuality(Quality)
-            if LowerQuality.next ~= Quality.name then -- If a lower quality could not be found.
+            
+            local Key
+            local Param1
+            local Param2
+            local Param3
+
+            if Empty(Item.localised_name) then
+                Param1 = {"item-name." .. Item.name}
+            else
+                Param1 = Item.localised_name
+            end
+
+            if Empty(Quality.localised_name) then
+                Param2 = {"quality-name." .. Quality.name}
+            else
+                Param2 = Quality.localised_name
+            end
+
+            if LowerQuality.next ~= Quality.name then
+                -- Fallback case, input is of lowest quality
+                -- Need 2.1 features in order to specify recipe quality
                 Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
                 Recipe.results = {{type = "item", name = Item.name, amount = 1}}
-                
-                if not Empty(Item.localised_name) then
-                    if not Empty(Quality.localised_name)then
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", Item.localised_name, Quality.localised_name}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", Item.localised_name, Quality.localised_name}
-                    else
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", Item.localised_name, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", Item.localised_name, {"quality-name." .. Quality.name}}
-                    end
-                else
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, Quality.localised_name}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, Quality.localised_name}
-                    else
-                        Recipe.localised_name = {"relabeler.relabeling-name-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"relabeler.relabeling-description-normal", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                    end
-                end
+
+                Key = "-normal"
+
             else -- If a lower quality was found.
+                -- Normal case, LowerQuality represents the previous quality
+                -- Need 2.1 features in order to specify recipe quality
                 Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
                 Recipe.results = {{type = "item", name = Item.name, amount = 1}}
-                
-                if not Empty(Item.localised_name) then
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name", Item.localised_name, Quality.localised_name}
-                        if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, Quality.localised_name, LowerQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, Quality.localised_name, {"quality-name." .. LowerQuality.name}}
-                        end
-                    else
-                        Recipe.localised_name = {"relabeler.relabeling-name", Item.localised_name, {"quality-name." .. Quality.name}}
-                        if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, {"quality-name." .. Quality.name}, LowerQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"relabeler.relabeling-description", Item.localised_name, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
-                        end
-                    end
+
+                if Empty(LowerQuality) then
+                    Param3 = {"quality-name." .. LowerQuality.name}
                 else
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, Quality.localised_name}
-                        if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, Quality.localised_name, LowerQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, Quality.localised_name, {"quality-name." .. LowerQuality.name}}
-                        end
-                    else
-                        Recipe.localised_name = {"relabeler.relabeling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                        if not Empty(LowerQuality.localised_name) then
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, LowerQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"relabeler.relabeling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. LowerQuality.name}}
-                        end
-                    end
+                    Param3 = LowerQuality.localised_name
                 end
+
+                Key = ""
+            end
+
+            if Param3 then
+                Recipe.localised_name = {"relabeler.relabeling-name" .. Key, Param1, Param2, Param3}
+                Recipe.localised_description = {"relabeler.relabeling-description" .. Key, Param1, Param2, Param3}
+            else
+                Recipe.localised_name = {"relabeler.relabeling-name" .. Key, Param1, Param2}
+                Recipe.localised_description = {"relabeler.relabeling-description" .. Key, Param1, Param2}
             end
             data.extend({Recipe})
             ::QualityContinue::
