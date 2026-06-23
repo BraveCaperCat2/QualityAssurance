@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.0
+Date: 24/06/2026
+  Major Features:
+    - Update the mod to support Factorio 2.1.
+    - Use the Major Features category in a QA changelog for the first time in over a year.
+  Features:
+    - Finally added the relabeler and upcycler, which reduce and increase the qualities of items.
+      People who updated from version 1.4.10 will have to explictly enable these machines in the settings, but are enabled by default for new players.
+    - AMS and Base Quality now apply to labs, such as the Lab from the base game and the Biolab from space age.
+  Bugfixes:
+    - Fix a bug where certain AMS technologies would get a potentially confusing technology trigger.
+    - Fix multiple bugs that occured in testing while updating the mod for Factorio 2.1.
+  Translation:
+    - Localisation for the new features may not be fully available for non-english languages just yet.
+---------------------------------------------------------------------------------------------------
 Version: 1.4.10
 Date: 08/06/2026
   Bugfixes:

@@ -12,7 +12,6 @@ if dataConfig("relabeler") then
     RelabelingCategory.name = "relabeling"
 
     local RelabelerMachine = table.deepcopy(data.raw["furnace"]["recycler"])
-    RelabelerMachine.type = "assembling-machine" -- Temporary fix for crash with multiple recipes having the same ingredients, until quality-dependent recipe ingredients/results can be done.
     RelabelerMachine.name = "qa_relabeler"
     RelabelerMachine.crafting_categories = {"relabeling"}
     RelabelerMachine.module_slots = 4
@@ -32,14 +31,21 @@ if dataConfig("relabeler") then
     local RelabelerRecipe = {}
     RelabelerRecipe.name = RelabelerItem.name
     RelabelerRecipe.type = "recipe"
-    RelabelerRecipe.ingredients = {{type = "item", name = "electronic-circuit", amount = 25}, {type = "item", name = "advanced-circuit", amount = 10}, {type = "item", name = "steel-plate", amount = 30}, {type = "item", name = "iron-gear-wheel", amount = 15}}
+    ---@cast RelabelerRecipe data.RecipePrototype
+    RelabelerRecipe.ingredients = {
+        {type = "item", name = "electronic-circuit", amount = 25},
+        {type = "item", name = "advanced-circuit", amount = 10},
+        {type = "item", name = "steel-plate", amount = 30},
+        {type = "item", name = "iron-gear-wheel", amount = 15},
+        {type = "item", name = "speed-module", amount = 20, quality_change = -1}
+    }
     RelabelerRecipe.results = {{type = "item", name = RelabelerItem.name, amount = 1}}
-    RelabelerRecipe.category = "crafting"
+    RelabelerRecipe.categories = {"crafting"}
     RelabelerRecipe.enabled = false
 
     local RelabelerTechnology = table.deepcopy(data.raw["technology"]["recycling"])
     RelabelerTechnology.name = RelabelerRecipe.name
-    RelabelerTechnology.prerequisites = {"quality-module", "electronics", "advanced-circuit", "steel-processing"}
+    RelabelerTechnology.prerequisites = {"speed-module", "electronics", "advanced-circuit", "steel-processing"}
     RelabelerTechnology.effects = {{type = "unlock-recipe", recipe = RelabelerRecipe.name}}
     RelabelerTechnology.unit = {count = 350, ingredients = {{"automation-science-pack", 2}, {"logistic-science-pack", 2}, {"chemical-science-pack", 1}}, time = 45}
     RelabelerTechnology.research_trigger = nil
@@ -76,19 +82,25 @@ if dataConfig("upcycler") then
     local UpcyclerRecipe = {}
     UpcyclerRecipe.name = UpcyclerItem.name
     UpcyclerRecipe.type = "recipe"
-    UpcyclerRecipe.ingredients = {{type = "item", name = "electronic-circuit", amount = 75}, {type = "item", name = "advanced-circuit", amount = 50}, {type = "item", name = "iron-gear-wheel", amount = 35}, {type = "item", name = "assembling-machine-3", amount = 1}}
+    UpcyclerRecipe.ingredients = {
+        {type = "item", name = "electronic-circuit", amount = 75},
+        {type = "item", name = "advanced-circuit", amount = 50},
+        {type = "item", name = "iron-gear-wheel", amount = 35},
+        {type = "item", name = "assembling-machine-3", amount = 1},
+        {type = "item", name = "quality-module-3", amount = 20, quality_change = 2}
+    }
     UpcyclerRecipe.results = {{type = "item", name = UpcyclerItem.name, amount = 1}}
-    UpcyclerRecipe.category = "crafting"
+    UpcyclerRecipe.categories = {"crafting"}
     UpcyclerRecipe.enabled = false
 
     local UpcyclerTechnology = table.deepcopy(data.raw["technology"]["recycling"])
     UpcyclerTechnology.name = UpcyclerRecipe.name
-    UpcyclerTechnology.prerequisites = {"quality-module", "electronics", "advanced-circuit", "automation-3"}
+    UpcyclerTechnology.prerequisites = {"quality-module-3", "electronics", "advanced-circuit", "automation-3"}
     if dataConfig("relabeler") then
         table.insert(UpcyclerTechnology.prerequisites, "qa_relabeler")
     end
     UpcyclerTechnology.effects = {{type = "unlock-recipe", recipe = UpcyclerRecipe.name}}
-    UpcyclerTechnology.unit = {count = 1400, ingredients = {{"automation-science-pack", 1}, {"logistic-science-pack", 1}, {"chemical-science-pack", 1}}, time = 60}
+    UpcyclerTechnology.unit = {count = 1400, ingredients = table.deepcopy(data.raw["technology"]["automation-3"].unit.ingredients), time = 60}
     UpcyclerTechnology.research_trigger = nil
     data.extend({UpcyclingCategory, UpcyclerMachine, UpcyclerItem, UpcyclerRecipe, UpcyclerTechnology})
 end

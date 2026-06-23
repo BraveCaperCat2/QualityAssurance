@@ -21,7 +21,7 @@ end
 -- The function part was my idea though and I've collapsed most of the indentation.
 local function Localiser(AMS, Machine, removedSlots)
     local LocalisationKey = ""
-    local LocalisationParameter = {}
+    
     -- RMS vs AMS distinction
     if removedSlots then
         LocalisationKey = LocalisationKey .. "rms."
@@ -36,12 +36,7 @@ local function Localiser(AMS, Machine, removedSlots)
         LocalisationKey = LocalisationKey .. ""
     end
 
-    -- Localised name vs no localised name distinction
-    if not Empty(Machine.localised_name) then
-        LocalisationParameter = Machine.localised_name
-    else
-        table.insert(LocalisationParameter, "entity-name."..Machine.name)
-    end
+    local LocalisationParameter = GetLocaleName(Machine)
 
     -- Actually add the localisation
     AMS.localised_name = {LocalisationKey .. "name", LocalisationParameter}
@@ -325,7 +320,7 @@ end
 --[[ -- No longer needed as of 1.4.1. Try returning this code if something breaks.
 local function NAMSModifications(Machine)
     local NAMSMachine = data.raw[Machine.type][Machine.NAMSMachine]
-    Machine.category = NAMSMachine.category
+    Machine.crafting_categories = NAMSMachine.crafting_categories
     return Machine
 end
 
@@ -349,25 +344,20 @@ for _,MachineType in pairs(MachineTypes) do
 end
 ]]
 
--- Code to generate relabeler recipes. It'll only work once I can make quality-dependent recipes and results and update the code here.
--- Then I can enable the relabeler setting in settings.lua to make it work.
+-- Code to generate relabeler recipes.
 if dataConfig("relabeler") then
     -- The relabeler, decreases the quality of an item by 1 tier. Does nothing to normal quality items.
     CondLog("Creating relabeler recipes.")
     local function GetLowerQuality(HigherQuality)
         local LowerQuality
-        local LowestQuality
         for _,Quality in pairs(data.raw["quality"]) do
-            if not LowestQuality or Quality.level < LowestQuality.level then
-                LowestQuality = Quality
-            end
-            if Quality.next == HigherQuality.name then
+            if Quality.next == HigherQuality.name and not (Quality.hidden or Quality.parameter) then
                 LowerQuality = Quality
                 break
             end
         end
         if not LowerQuality then
-            LowerQuality = LowestQuality
+            LowerQuality = HigherQuality
         end
         return LowerQuality
     end
@@ -382,58 +372,27 @@ if dataConfig("relabeler") then
             local Recipe = {}
             Recipe.name = Item.name .. "-relabeling-" .. Quality.name
             Recipe.type = "recipe"
-            Recipe.category = "relabeling"
+            ---@cast Recipe data.RecipePrototype
+            Recipe.categories = {"relabeling"}
             Recipe.subgroup = Item.subgroup
             Recipe.enabled = true
+
+            Recipe.hidden = true
+            Recipe.hidden_in_factoriopedia = true
+
             local LowerQuality = GetLowerQuality(Quality)
             
-            local Key
-            local Param1
-            local Param2
-            local Param3
+            local Key = (LowerQuality.next ~= Quality.name) and "-normal" or ""
+            local Param1 = GetLocaleName(Item)
+            local Param2 = GetLocaleName(Quality)
+            local Param3 = GetLocaleName(LowerQuality)
 
-            if Empty(Item.localised_name) then
-                Param1 = {"item-name." .. Item.name}
-            else
-                Param1 = Item.localised_name
-            end
+            Recipe.ingredients = {{type = "item", name = Item.name, amount = 1, quality_min = Quality.name, quality_max = Quality.name}}
+            Recipe.results = {{type = "item", name = Item.name, amount = 1, quality_min = LowerQuality.name, quality_max = LowerQuality.name}}
 
-            if Empty(Quality.localised_name) then
-                Param2 = {"quality-name." .. Quality.name}
-            else
-                Param2 = Quality.localised_name
-            end
+            Recipe.localised_name = {"relabeler.relabeling-name" .. Key, Param1, Param2, Param3}
+            -- Recipe.localised_description = {"relabeler.relabeling-description" .. Key, Param1, Param2, Param3}
 
-            if LowerQuality.next ~= Quality.name then
-                -- Fallback case, input is of lowest quality
-                -- Need 2.1 features in order to specify recipe quality
-                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
-                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
-
-                Key = "-normal"
-
-            else -- If a lower quality was found.
-                -- Normal case, LowerQuality represents the previous quality
-                -- Need 2.1 features in order to specify recipe quality
-                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
-                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
-
-                if Empty(LowerQuality) then
-                    Param3 = {"quality-name." .. LowerQuality.name}
-                else
-                    Param3 = LowerQuality.localised_name
-                end
-
-                Key = ""
-            end
-
-            if Param3 then
-                Recipe.localised_name = {"relabeler.relabeling-name" .. Key, Param1, Param2, Param3}
-                Recipe.localised_description = {"relabeler.relabeling-description" .. Key, Param1, Param2, Param3}
-            else
-                Recipe.localised_name = {"relabeler.relabeling-name" .. Key, Param1, Param2}
-                Recipe.localised_description = {"relabeler.relabeling-description" .. Key, Param1, Param2}
-            end
             data.extend({Recipe})
             ::QualityContinue::
         end
@@ -448,18 +407,14 @@ if dataConfig("upcycler") then
     CondLog("Creating upcycler recipes.")
     local function GetHigherQuality(LowerQuality)
         local HigherQuality
-        local HighestQuality
         for _,Quality in pairs(data.raw["quality"]) do
-            if not HighestQuality or Quality.level > HighestQuality.level then
-                HighestQuality = Quality
-            end
             if LowerQuality.next == Quality.name then
                 HigherQuality = Quality
                 break
             end
         end
         if not HigherQuality then
-            HigherQuality = HighestQuality
+            HigherQuality = LowerQuality
         end
         return HigherQuality
     end
@@ -474,8 +429,7 @@ if dataConfig("upcycler") then
         -- Provided by "mmmPI" on the factorio forums. Just not for this specific purpose. Thank you!
         -- Maps low1 onto low2, high1 onto high2 and values between low1 and high1 onto values between low2 and high2.
         -- low2 + (value - low1) * (high2 - low2) / (high1 - low1)
-        return 30 + (QualityLevel - 0) * (49 - 30) / (HighestQuality.level - 0)
-
+        return 45 + (QualityLevel - 0) * (30 - 45) / (HighestQuality.level - 0)
     end
     for _,Item in pairs(data.raw["item"]) do
         if Item.hidden or Item.parameter then
@@ -488,79 +442,55 @@ if dataConfig("upcycler") then
             local Recipe = {}
             Recipe.name = Item.name .. "-upcycling-" .. Quality.name
             Recipe.type = "recipe"
-            Recipe.category = "upcycling"
+            ---@cast Recipe data.RecipePrototype
+            Recipe.categories = {"upcycling"}
             Recipe.subgroup = Item.subgroup
             Recipe.enabled = true
+
+            Recipe.hidden = true
+            Recipe.hidden_in_factoriopedia = true
+
+            Recipe.icon = Item.icon
+            Recipe.icon_size = Item.icon_size
+            Recipe.icons = Item.icons
+
             local HigherQuality = GetHigherQuality(Quality)
-            if Quality.next ~= HigherQuality.name then -- If a higher quality could not be found.
-                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
-                Recipe.results = {{type = "item", name = Item.name, amount = 1}}
-                Recipe.icon = Item.icon
-                Recipe.icon_size = Item.icon_size
-                Recipe.icons = Item.icons
-                
-                if not Empty(Item.localised_name) then
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", Item.localised_name, Quality.localised_name}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", Item.localised_name, Quality.localised_name}
-                    else
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", Item.localised_name, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", Item.localised_name, {"quality-name." .. Quality.name}}
-                    end
-                else
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, Quality.localised_name}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, Quality.localised_name}
-                    else
-                        Recipe.localised_name = {"upcycler.upcycling-name-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                        Recipe.localised_description = {"upcycler.upcycling-description-legendary", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                    end
-                end
-            else -- If a higher quality was found.
-                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1}}
+            
+            local Key = (Quality.next ~= HigherQuality.name) and "-legendary" or ""
+            local Param1 = GetLocaleName(Item)
+            local Param2 = GetLocaleName(Quality)
+            local Param3 = GetLocaleName(HigherQuality)
+
+            if Quality.next ~= HigherQuality.name then
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1, quality_min = Quality.name, quality_max = Quality.name}}
+                Recipe.results = {{type = "item", name = Item.name, amount = 1, quality_min = Quality.name, quality_max = Quality.name}}
+            else
+                local probability = QualityLevelToProbability(HigherQuality.level)
+                Recipe.ingredients = {{type = "item", name = Item.name, amount = 1, quality_min = Quality.name, quality_max = Quality.name}}
                 Recipe.results = {
-                    {type = "item", name = Item.name, probability = (50 - QualityLevelToProbability(Quality.level)) / 100, amount = 1}, -- Increase Quality
-                    {type = "item", name = Item.name, probability = 0.5, amount = 1} -- Fail softly
+                    { -- Increase Quality
+                        type = "item",
+                        name = Item.name,
+                        shared_probability = {min = 0.5, max = (probability + 50) / 100},
+                        amount = 1,
+                        quality_min = HigherQuality.name,
+                        quality_max = HigherQuality.name
+                    },
+                    { -- Fail softly
+                        type = "item",
+                        name = Item.name,
+                        shared_probability = {min = 0, max = 0.5},
+                        amount = 1,
+                        quality_min = Quality.name,
+                        quality_max = Quality.name
+                    }
                     -- Fail hardly (results in nothing)
                 }
-                Recipe.icon = Item.icon
-                Recipe.icon_size = Item.icon_size
-                Recipe.icons = Item.icons
-                
-                if not Empty(Item.localised_name) then
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name", Item.localised_name, Quality.localised_name}
-                        if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, Quality.localised_name, HigherQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, Quality.localised_name, {"quality-name." .. HigherQuality.name}}
-                        end
-                    else
-                        Recipe.localised_name = {"upcycler.upcycling-name", Item.localised_name, {"quality-name." .. Quality.name}}
-                        if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, {"quality-name." .. Quality.name}, HigherQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"upcycler.upcycling-description", Item.localised_name, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
-                        end
-                    end
-                else
-                    if not Empty(Quality.localised_name) then
-                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, Quality.localised_name}
-                        if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, Quality.localised_name, HigherQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, Quality.localised_name, {"quality-name." .. HigherQuality.name}}
-                        end
-                    else
-                        Recipe.localised_name = {"upcycler.upcycling-name", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}}
-                        if not Empty(HigherQuality.localised_name) then
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, HigherQuality.localised_name}
-                        else
-                            Recipe.localised_description = {"upcycler.upcycling-description", {"item-name." .. Item.name}, {"quality-name." .. Quality.name}, {"quality-name." .. HigherQuality.name}}
-                        end
-                    end
-                end
             end
+
+            Recipe.localised_name = {"upcycler.upcycling-name" .. Key, Param1, Param2, Param3}
+            -- Recipe.localised_description = {"upcycler.upcycling-description" .. Key, Param1, Param2, Param3}
+
             CondLog(serpent.block(Recipe))
             data.extend({Recipe})
             ::QualityContinue::
@@ -625,10 +555,10 @@ local function EnableEffectSources(Machine)
     Machine.effect_receiver.uses_surface_effects = true
 end
 
-local RecyclingLibrary = require("__quality__.prototypes.recycling")
+local RecyclingLibrary = require("__recycler__.recycling")
 
 -- Perform operations on automated crafting.
-local MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
+local MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo", "lab"}
 
 CondLog("Performing operations on Automated Crafting.")
 for _,MachineType in pairs(MachineTypes) do
@@ -710,7 +640,7 @@ for _,MachineType in pairs(MachineTypes) do
             end
 
             -- Create a new version of all machines which don't have additional module slots.
-            if ( not string.find(Machine.name, "qa_") ) and dataConfig("ams-machines-toggle") and ( not AMSBanned ) and (dataConfig("enable-ams-" .. MachineType)) then
+            if (not string.find(Machine.name, "-ams")) and dataConfig("ams-machines-toggle") and (not AMSBanned) and (dataConfig("enable-ams-" .. MachineType)) then
                 CondLog("Creating AMS version of \"" .. Machine.name .. "\" now.")
                 local AMSMachine = table.deepcopy(Machine)
                 AMSMachine.name = "qa_" .. AMSMachine.name .. "-ams"
@@ -828,7 +758,7 @@ for _,MachineType in pairs(MachineTypes) do
                 end
 
                 AMSMachineRecipe.results = {{type = "item", name = AMSMachineItem.name, amount = 1}}
-                AMSMachineRecipe.category = "crafting"
+                AMSMachineRecipe.categories = {"crafting"}
                 AMSMachineRecipe.enabled = false
                 
                 local AMSMachineTechnology = table.deepcopy(data.raw["technology"]["automation-2"])
@@ -862,8 +792,8 @@ for _,MachineType in pairs(MachineTypes) do
                             AMSMachineTechnology.unit.count_formula = "2 * (" .. AMSMachineTechnology.unit.count_formula .. ")"
                         end
                         AMSMachineTechnology.research_trigger = nil
-                    elseif PrerequisiteTech.research_trigger then
-                        AMSMachineTechnology.research_trigger = table.deepcopy(PrerequisiteTech.research_trigger)
+                    else
+                        AMSMachineTechnology.research_trigger = {type = "build-entity", entity = {name = Machine.name}}
                         AMSMachineTechnology.unit = nil
                     end
                 else

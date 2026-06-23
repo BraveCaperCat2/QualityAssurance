@@ -1,6 +1,6 @@
 local EnableCraftingSpeedFunction = true
-local EnableRelabelerAndUpcycler = false -- Causes a crash if enabled, because the relabeler and upcycler are not functional yet.
-MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo"}
+local EnableRelabelerAndUpcycler = true -- Causes a crash if enabled, because the relabeler and upcycler are not functional yet.
+MachineTypes = {"assembling-machine", "furnace", "mining-drill", "rocket-silo", "lab"}
 
 data:extend{
     -- Quality unlocks section

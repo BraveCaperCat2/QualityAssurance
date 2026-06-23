@@ -30,6 +30,7 @@ local function on_configuration_changed(ConfigurationChangedData)
     on_init()
 end
 
+---@param event EventData.on_research_finished
 local function on_research_finished(event)
     local ShowAMSTech = not globalConfig(HideOption)
 	local Technology = event.research

@@ -1,3 +1,5 @@
+local flib_locale = require("__flib__.locale")
+
 -- Returns the value of the setting with the provided name, or nil if it doesn't exist. Prefix should not be provided.
 -- This function returns the value of a startup setting, but can still be used in control scripts and migrations.
 function dataConfig(name)
@@ -37,4 +39,10 @@ end
 -- Checks if a localised string is nil or empty.
 function Empty(f)
     return f == nil or f == "" or (type(f) == "table" and not next(f))
+end
+
+-- Alias for flib function
+---@param prototype {name: string, type: string}
+function GetLocaleName(prototype)
+    return flib_locale.of(prototype)
 end
